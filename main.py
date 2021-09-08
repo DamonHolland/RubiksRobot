@@ -1,6 +1,6 @@
 import pygame
-from pygame.locals import *
 import numpy as np
+from pygame.locals import *
 from math import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -20,6 +20,7 @@ x_angle = 90
 y_angle = 90
 z_angle = 0
 
+
 def draw_cube(cube_x, cube_y, cube_z):
     width = 0.5
     vertices = (
@@ -32,7 +33,7 @@ def draw_cube(cube_x, cube_y, cube_z):
         np.matrix([cube_x + width, cube_y + width, cube_z + width]),
         np.matrix([cube_x + width, cube_y - width, cube_z + width])
     )
-    edges = ((0, 1),(0, 3),(0, 4),(1, 2),(1, 5),(2, 3),(2, 6),(3, 7),(4, 5),(4, 7),(5, 6),(6, 7))
+    edges = ((0, 1), (0, 3), (0, 4), (1, 2), (1, 5), (2, 3), (2, 6), (3, 7), (4, 5), (4, 7), (5, 6), (6, 7))
     faces = ((0, 1, 2, 3), (4, 5, 6, 7), (0, 4, 7, 3), (1, 5, 6, 2), (2, 6, 7, 3), (1, 5, 4, 0))
 
     rotation_x = np.matrix([[1, 0, 0], [0, cos(x_angle), -sin(x_angle)], [0, sin(x_angle), cos(x_angle)]])
@@ -41,18 +42,18 @@ def draw_cube(cube_x, cube_y, cube_z):
 
     rotated_points = []
     for vertex in vertices:
-        rotatedVertex = np.dot(rotation_z, vertex.reshape((3, 1)))
-        rotatedVertex = np.dot(rotation_y, rotatedVertex)
-        rotatedVertex = np.dot(rotation_x, rotatedVertex)
-        rotated_points.append(rotatedVertex)
+        rotated_vertex = np.dot(rotation_z, vertex.reshape((3, 1)))
+        rotated_vertex = np.dot(rotation_y, rotated_vertex)
+        rotated_vertex = np.dot(rotation_x, rotated_vertex)
+        rotated_points.append(rotated_vertex)
 
     glBegin(GL_QUADS)
-    i = 0
+    color_index = 0
     for face in faces:
         for vertex in face:
-            glColor3fv(COLORS[i])
+            glColor3fv(COLORS[color_index])
             glVertex3fv(rotated_points[vertex])
-        i += 1
+        color_index += 1
     glEnd()
 
     glBegin(GL_LINES)
@@ -62,9 +63,10 @@ def draw_cube(cube_x, cube_y, cube_z):
             glVertex3fv(rotated_points[vertex])
     glEnd()
 
+
 if __name__ == '__main__':
     pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), DOUBLEBUF|OPENGL)
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), DOUBLEBUF | OPENGL)
     gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50.0)
     glEnable(GL_DEPTH_TEST)
     glTranslatef(0.0, 0.0, -8)
