@@ -4,9 +4,14 @@ from math import *
 
 WINDOW_HEIGHT = 720
 WINDOW_WIDTH = 720
-WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+ORANGE = (255, 128, 0)
+COLORS = [RED, GREEN, BLUE, WHITE, YELLOW, ORANGE]
 SCALE = 100
 ROTATE_SPEED = 0.005
 x_angle = 90
@@ -38,11 +43,33 @@ def draw_cube(cube_x, cube_y, cube_z):
         y = int(projected2d[1][0] * SCALE) + WINDOW_HEIGHT / 2
         projected_points.append([x, y])
 
-    for i in range(8):
-        for j in range(i + 1, 8):
-            if dist(points[i].reshape((3, 1)), points[j].reshape((3, 1))) == 1:
-                pygame.draw.line(screen, BLACK, projected_points[i], projected_points[j])
+    projected_edges = [ [projected_points[0], projected_points[1]],
+                        [projected_points[0], projected_points[2]],
+                        [projected_points[0], projected_points[4]],
+                        [projected_points[1], projected_points[3]],
+                        [projected_points[1], projected_points[5]],
+                        [projected_points[2], projected_points[3]],
+                        [projected_points[2], projected_points[6]],
+                        [projected_points[3], projected_points[7]],
+                        [projected_points[4], projected_points[5]],
+                        [projected_points[4], projected_points[6]],
+                        [projected_points[5], projected_points[7]],
+                        [projected_points[6], projected_points[7]] ]
 
+    for edge in projected_edges:
+        pygame.draw.line(screen, WHITE, edge[0], edge[1])
+
+    projected_faces = [ [projected_edges[0][0], projected_edges[5][0], projected_edges[5][1], projected_edges[0][1]],
+                        [projected_edges[0][0], projected_edges[8][0], projected_edges[8][1], projected_edges[0][1]],
+                        [projected_edges[1][0], projected_edges[9][0], projected_edges[9][1], projected_edges[1][1]],
+                        [projected_edges[3][0], projected_edges[10][0], projected_edges[10][1], projected_edges[3][1]],
+                        [projected_edges[5][0], projected_edges[11][0], projected_edges[11][1], projected_edges[5][1]],
+                        [projected_edges[8][0], projected_edges[11][0], projected_edges[11][1], projected_edges[8][1]]]
+
+    i = 0
+    for face in projected_faces:
+        pygame.draw.polygon(screen, COLORS[i], [face[0], face[1], face[2], face[3]])
+        i += 1
 
 if __name__ == '__main__':
     pygame.init()
@@ -66,7 +93,7 @@ if __name__ == '__main__':
             x_angle += (new_pos[1] - prev_mouse_pos[1]) * ROTATE_SPEED
             prev_mouse_pos = new_pos
 
-        screen.fill(WHITE)
+        screen.fill(BLACK)
         for i in range(3):
             for j in range(3):
                 for k in range(3):
