@@ -1,5 +1,7 @@
 import pygame
 import numpy as np
+import Colors
+import RubiksCube
 from pygame.locals import *
 from math import *
 from OpenGL.GL import *
@@ -7,21 +9,22 @@ from OpenGL.GLU import *
 
 WINDOW_HEIGHT = 720
 WINDOW_WIDTH = 720
-BLACK = (0, 0, 0)
-RED = (1, 0, 0)
-GREEN = (0, 1, 0)
-BLUE = (0, 0, 1)
-WHITE = (1, 1, 1)
-YELLOW = (1, 1, 0)
-ORANGE = (1, 0.5, 0)
-COLORS = [RED, ORANGE, YELLOW, WHITE, BLUE, GREEN]
 ROTATE_SPEED = 0.005
-x_angle = 90
-y_angle = 90
+x_angle = 0
+y_angle = 0
 z_angle = 0
 
 
-def draw_cube(cube_x, cube_y, cube_z):
+def draw_cube(cube):
+    piece_index = 0
+    for j in range(3):
+        for k in range(3):
+            for i in range(3):
+                draw_piece(-1.1 + (i * 1.1), 1.1 - (j * 1.1), -1.1 + (k * 1.1), cube.pieces[piece_index])
+                piece_index += 1
+
+
+def draw_piece(cube_x, cube_y, cube_z, piece):
     width = 0.5
     vertices = (
         np.matrix([cube_x - width, cube_y - width, cube_z - width]),
@@ -51,13 +54,13 @@ def draw_cube(cube_x, cube_y, cube_z):
     color_index = 0
     for face in faces:
         for vertex in face:
-            glColor3fv(COLORS[color_index])
+            glColor3fv(piece.colors[color_index])
             glVertex3fv(rotated_points[vertex])
         color_index += 1
     glEnd()
 
     glBegin(GL_LINES)
-    glColor3fv(BLACK)
+    glColor3fv(Colors.BLACK)
     for edge in edges:
         for vertex in edge:
             glVertex3fv(rotated_points[vertex])
@@ -89,10 +92,9 @@ if __name__ == '__main__':
             x_angle += (new_pos[1] - prev_mouse_pos[1]) * ROTATE_SPEED
             prev_mouse_pos = new_pos
         glRotatef(0, 0, 0, 0)
+        glClearColor(0.1, 0.1, 0.2, 0)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        for i in range(3):
-            for j in range(3):
-                for k in range(3):
-                    draw_cube(-1 + i, -1 + j, -1 + k)
+        rubiks_cube = RubiksCube.RubiksCube()
+        draw_cube(rubiks_cube)
         pygame.display.flip()
         pygame.time.Clock().tick(60)
