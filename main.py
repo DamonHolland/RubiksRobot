@@ -77,6 +77,7 @@ if __name__ == '__main__':
     running = True
     drag = False
     prev_mouse_pos = [0, 0]
+    rubiks_cube = RubiksCube.RubiksCube()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -86,6 +87,9 @@ if __name__ == '__main__':
                 prev_mouse_pos = pygame.mouse.get_pos()
             elif event.type == pygame.MOUSEBUTTONUP:
                 drag = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_u:
+                    rubiks_cube.U()
         if drag:
             new_pos = pygame.mouse.get_pos()
             y_angle += (new_pos[0] - prev_mouse_pos[0]) * ROTATE_SPEED
@@ -94,7 +98,6 @@ if __name__ == '__main__':
         glRotatef(0, 0, 0, 0)
         glClearColor(0.1, 0.1, 0.2, 0)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        rubiks_cube = RubiksCube.RubiksCube()
         draw_cube(rubiks_cube)
         pygame.display.flip()
         pygame.time.Clock().tick(60)
