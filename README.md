@@ -1,6 +1,6 @@
 # RubiksRobot
 
-##Notes
+#Notes
 
 Rubik's Cube:
 
@@ -10,7 +10,7 @@ Rubik's Cube:
 
 - 2 Webcams scanning 3 sides of Rubik's cube each
 
-##Numbering the Rubik's Cube
+#Numbering the Rubik's Cube
 
 #Top
 
