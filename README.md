@@ -10,7 +10,7 @@ Rubik's Cube:
 
 - 2 Webcams scanning 3 sides of Rubik's cube each
 
-##Numbering the Rubik's Cube
+#Numbering the Rubik's Cube
 
 -Top
 ![alt text](https://github.com/DamonHolland/RubiksRobot/blob/master/Rubik%E2%80%99s%20Cube%20Design%20Top-1.jpg)
