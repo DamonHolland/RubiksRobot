@@ -13,7 +13,13 @@ Rubik's Cube:
 #Numbering the Rubik's Cube
 
 -Top
+W - White
+G - Green
+R - Red
 ![alt text](https://github.com/DamonHolland/RubiksRobot/blob/master/Rubik%E2%80%99s%20Cube%20Design%20Top-1.jpg)
 
 -Bottom
+Y - Yellow
+B - Blue
+O - Orange
 ![alt text](https://github.com/DamonHolland/RubiksRobot/blob/master/Rubik%E2%80%99s%20Cube%20Design%20bot-2.jpg)
