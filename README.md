@@ -20,7 +20,7 @@ Rubik's Cube:
 
 - R - Red
 
-![alt text](https://github.com/DamonHolland/RubiksRobot/blob/master/Rubik%E2%80%99s%20Cube%20Design%20Top-1.jpg)
+![alt text](https://github.com/DamonHolland/RubiksRobot/blob/master/images/Rubik%E2%80%99s%20Cube%20Design%20Bot.jpg)
 
 #Bottom
 
