@@ -106,7 +106,7 @@ while True:
     frameStack = stackFrames(0.8, ([frame, frameCanny, frameGray],
                                    [frameDil, frameContour, frameContour]))
 
-    cv.imshow('Rubiks Cube Viewer', frameStack)
+    cv.imshow('Rubiks Cube Viewer', frameContour)
 
     if cv.waitKey(1) == ord('q'):
         break

@@ -17,6 +17,5 @@ class RGBUint8:
     GREEN_MIN = np.array([10, 50, 10], np.uint8)
     GREEN_MAX = np.array([100, 255, 100], np.uint8)
 
-    ORANGE = (19, 41, 73)
     ORANGE_MIN = np.array([15, 30, 50], np.uint8)
     ORANGE_MAX = np.array([255, 165, 255], np.uint8)
