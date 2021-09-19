@@ -1,13 +1,12 @@
 import time
-
 from visuals.RubiksVisualizer import RubiksVisualizer
 from model.RubiksCube import RubiksCube
 from threading import Thread
 
 
 def shuffleCube(cube):
-    for i in range(50):
-        time.sleep(0.3)
+    for i in range(30):
+        time.sleep(0.4)
         cube.shuffle(1)
 
 

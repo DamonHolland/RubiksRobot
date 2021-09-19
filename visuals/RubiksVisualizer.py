@@ -1,6 +1,5 @@
 import pygame
 import numpy as np
-
 from model import Colors
 from model.Colors import ColorDict
 from pygame.locals import *
@@ -76,23 +75,17 @@ class RubiksVisualizer:
                        [ColorDict[cube.faces[44]], Colors.BLACK, ColorDict[cube.faces[47]], Colors.BLACK, ColorDict[cube.faces[15]], Colors.BLACK],
                        [Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[50]], Colors.BLACK, ColorDict[cube.faces[16]], Colors.BLACK],
                        [Colors.BLACK, ColorDict[cube.faces[24]], ColorDict[cube.faces[53]], Colors.BLACK, ColorDict[cube.faces[17]], Colors.BLACK]]
-        piece_index = 0
         for j in range(3):
             for k in range(3):
                 for i in range(3):
-                    self.draw_piece(-1.1 + (i * 1.1), 1.1 - (j * 1.1), -1.1 + (k * 1.1), cube_pieces[piece_index])
-                    piece_index += 1
+                    self.draw_piece(-1.1 + (i * 1.1), 1.1 - (j * 1.1), -1.1 + (k * 1.1), cube_pieces[j * 9 + k * 3 + i])
 
     def draw_piece(self, cube_x, cube_y, cube_z, piece):
-        width = 0.5
-        vertices = (np.matrix([cube_x - width, cube_y - width, cube_z - width]),
-                    np.matrix([cube_x - width, cube_y + width, cube_z - width]),
-                    np.matrix([cube_x - width, cube_y + width, cube_z + width]),
-                    np.matrix([cube_x - width, cube_y - width, cube_z + width]),
-                    np.matrix([cube_x + width, cube_y - width, cube_z - width]),
-                    np.matrix([cube_x + width, cube_y + width, cube_z - width]),
-                    np.matrix([cube_x + width, cube_y + width, cube_z + width]),
-                    np.matrix([cube_x + width, cube_y - width, cube_z + width]))
+        w = 0.5
+        vertices = [np.matrix([cube_x - w, cube_y - w, cube_z - w]), np.matrix([cube_x - w, cube_y + w, cube_z - w]),
+                    np.matrix([cube_x - w, cube_y + w, cube_z + w]), np.matrix([cube_x - w, cube_y - w, cube_z + w]),
+                    np.matrix([cube_x + w, cube_y - w, cube_z - w]), np.matrix([cube_x + w, cube_y + w, cube_z - w]),
+                    np.matrix([cube_x + w, cube_y + w, cube_z + w]), np.matrix([cube_x + w, cube_y - w, cube_z + w])]
         edges = ((0, 1), (0, 3), (0, 4), (1, 2), (1, 5), (2, 3), (2, 6), (3, 7), (4, 5), (4, 7), (5, 6), (6, 7))
         faces = ((0, 1, 2, 3), (4, 5, 6, 7), (0, 4, 7, 3), (1, 5, 6, 2), (2, 6, 7, 3), (1, 5, 4, 0))
 
@@ -100,25 +93,21 @@ class RubiksVisualizer:
         rotation_y = np.matrix([[cos(self.y_angle), 0, sin(self.y_angle)], [0, 1, 0], [-sin(self.y_angle), 0, cos(self.y_angle)]])
         rotation_z = np.matrix([[cos(self.z_angle), -sin(self.z_angle), 0], [sin(self.z_angle), cos(self.z_angle), 0], [0, 0, 1]])
 
-        rotated_points = []
-        for vertex in vertices:
-            rotated_vertex = np.dot(rotation_z, vertex.reshape((3, 1)))
-            rotated_vertex = np.dot(rotation_y, rotated_vertex)
-            rotated_vertex = np.dot(rotation_x, rotated_vertex)
-            rotated_points.append(rotated_vertex)
+        for i in range(len(vertices)):
+            vertices[i] = np.dot(rotation_z, vertices[i].reshape((3, 1)))
+            vertices[i] = np.dot(rotation_y, vertices[i])
+            vertices[i] = np.dot(rotation_x, vertices[i])
 
         glBegin(GL_QUADS)
-        color_index = 0
-        for face in faces:
-            for vertex in face:
-                glColor3fv(piece[color_index])
-                glVertex3fv(rotated_points[vertex])
-            color_index += 1
+        for i in range(len(faces)):
+            for vertex in faces[i]:
+                glColor3fv(piece[i])
+                glVertex3fv(vertices[vertex])
         glEnd()
 
         glBegin(GL_LINES)
         glColor3fv(Colors.BLACK)
         for edge in edges:
             for vertex in edge:
-                glVertex3fv(rotated_points[vertex])
+                glVertex3fv(vertices[vertex])
         glEnd()
