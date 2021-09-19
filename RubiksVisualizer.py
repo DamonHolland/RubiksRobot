@@ -37,10 +37,9 @@ class RubiksVisualizer:
                 elif event.type == pygame.MOUSEBUTTONUP:
                     drag = False
             if drag:
-                new_pos = pygame.mouse.get_pos()
-                self.y_angle += (new_pos[0] - prev_mouse_pos[0]) * self.ROTATE_SPEED
-                self.x_angle += (new_pos[1] - prev_mouse_pos[1]) * self.ROTATE_SPEED
-                prev_mouse_pos = new_pos
+                self.y_angle += (pygame.mouse.get_pos()[0] - prev_mouse_pos[0]) * self.ROTATE_SPEED
+                self.x_angle += (pygame.mouse.get_pos()[1] - prev_mouse_pos[1]) * self.ROTATE_SPEED
+                prev_mouse_pos = pygame.mouse.get_pos()
             glRotatef(0, 0, 0, 0)
             glClearColor(0.1, 0.1, 0.2, 0)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
