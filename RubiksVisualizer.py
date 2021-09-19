@@ -17,7 +17,7 @@ class RubiksVisualizer:
     y_angle = 0
     z_angle = 0
 
-    def __init__(self, rubiks_cube):
+    def start(self, rubiks_cube):
         pygame.init()
         pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT), DOUBLEBUF | OPENGL)
         gluPerspective(45, self.WINDOW_WIDTH / self.WINDOW_HEIGHT, 0.1, 50.0)
