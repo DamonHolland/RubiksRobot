@@ -1,8 +1,6 @@
 import cv2 as cv
 import numpy as np
 
-'''Colors'''
-
 frameWidth = 720
 frameHeight = 720
 cap = cv.VideoCapture(0)
