@@ -1,8 +1,8 @@
 import pygame
 import numpy as np
 
-import Colors
-from Colors import ColorDict
+from model import Colors
+from model.Colors import ColorDict
 from pygame.locals import *
 from math import *
 from OpenGL.GL import *

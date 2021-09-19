@@ -1,7 +1,7 @@
 from threading import Thread
 
-from RubiksCube import RubiksCube
-from RubiksVisualizer import RubiksVisualizer
+from model.RubiksCube import RubiksCube
+from visuals.RubiksVisualizer import RubiksVisualizer
 
 if __name__ == '__main__':
     rubiks_cube = RubiksCube()

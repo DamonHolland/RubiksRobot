@@ -1,4 +1,4 @@
-import RubiksCube
+from model import RubiksCube
 
 WHITE = (1, 1, 1)
 GREEN = (0, 1, 0)

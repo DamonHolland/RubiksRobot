@@ -1,7 +1,7 @@
 import time
 
-from RubiksVisualizer import RubiksVisualizer
-from RubiksCube import RubiksCube
+from visuals.RubiksVisualizer import RubiksVisualizer
+from model.RubiksCube import RubiksCube
 from threading import Thread
 
 
