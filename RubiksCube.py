@@ -29,7 +29,7 @@ class RubiksCube:
         return string
 
     def shuffle(self, move_count):
-        print("Shuffling Cube")
+        print("Shuffling Cube with {} turns".format(str(move_count)))
         for i in range(move_count):
             rand = random.randint(1, 12)
             if rand == 1:
