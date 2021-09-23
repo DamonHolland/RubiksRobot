@@ -7,7 +7,7 @@ from threading import Thread
 def shuffleCube(cube):
     for i in range(30):
         time.sleep(0.4)
-        cube.shuffle(1)
+        cube.scramble(1)
 
 
 if __name__ == '__main__':
