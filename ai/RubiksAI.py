@@ -5,6 +5,35 @@ from datetime import timedelta
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 from ai.RubiksMoves import MoveDict
+from model.RubiksCube import RubiksCube
+from visuals.RubiksVisualizer import RubiksVisualizer
+
+def perform_move(cube: RubiksCube, move):
+    if move == "U":
+        cube.rotate_white()
+    elif move == "U'":
+        cube.rotate_white(True)
+    elif move == "F":
+        cube.rotate_green()
+    elif move == "F'":
+        cube.rotate_green(True)
+    elif move == "R":
+        cube.rotate_red()
+    elif move == "R'":
+        cube.rotate_red(True)
+    elif move == "B":
+        cube.rotate_blue()
+    elif move == "B'":
+        cube.rotate_blue(True)
+    elif move == "L":
+        cube.rotate_orange()
+    elif move == "L'":
+        cube.rotate_orange(True)
+    elif move == "D":
+        cube.rotate_yellow()
+    elif move == "D'":
+        cube.rotate_yellow(True)
+
 
 if __name__ == '__main__':
 
@@ -34,8 +63,15 @@ if __name__ == '__main__':
 
     print("\nSingle Solve Test\n")
     single_x, single_y = data.create_training_data(1, 1)
-    print("Performing single scramble: {}".format(MoveDict[single_y[0] + 1] if single_y[0] % 2 == 0 else MoveDict[single_y[0] - 1]))
+    scramble_move = MoveDict[single_y[0] + 1] if single_y[0] % 2 == 0 else MoveDict[single_y[0] - 1]
+    cube = RubiksCube()
+    RubiksVisualizer(cube)
+    print("Performing single scramble: {}".format(scramble_move))
+    perform_move(cube, scramble_move)
+    time.sleep(5)
     prediction = list(model.predict(single_x)[0])
+    time.sleep(10)
     print(prediction)
-    print("AI predicts move {}".format(MoveDict[prediction.index(max(prediction))]))
-
+    prediction_move = MoveDict[prediction.index(max(prediction))]
+    perform_move(cube, prediction_move)
+    print("AI predicts move {}".format(prediction_move))
