@@ -42,7 +42,7 @@ class RubiksCube:
 
     def rotate_white(self, cc=False):
         if self.verbose:
-            print("Rotating White {}".format("CounterClockwise (U'))" if cc else "Clockwise (U)"))
+            print("Rotating White {}".format("CounterClockwise (U')" if cc else "Clockwise (U)"))
         self._rotate_swap(1, 5, 7, 3, cc)
         self._rotate_swap(0, 2, 8, 6, cc)
         self._rotate_swap(9, 36, 27, 18, cc)
