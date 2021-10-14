@@ -1,11 +1,20 @@
+from threading import Thread
+
 import pygame
 import numpy as np
-from model import Colors
-from model.Colors import ColorDict
+from model.RubiksCube import RubiksCube
 from pygame.locals import *
 from math import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
+
+ColorDict = {RubiksCube.WHITE: (1, 1, 1),
+             RubiksCube.GREEN: (0, 1, 0),
+             RubiksCube.RED: (1, 0, 0),
+             RubiksCube.BLUE: (0, 0, 1),
+             RubiksCube.ORANGE: (1, 0.5, 0),
+             RubiksCube.YELLOW: (1, 1, 0)}
+BLACK = (0, 0, 0)
 
 
 class RubiksVisualizer:
@@ -15,6 +24,10 @@ class RubiksVisualizer:
     x_angle = 0
     y_angle = 0
     z_angle = 0
+
+    def __init__(self, rubiks_cube):
+        Thread(target=self.start, args=[rubiks_cube]).start()
+
 
     def start(self, rubiks_cube):
         pygame.init()
@@ -48,33 +61,33 @@ class RubiksVisualizer:
 
     def draw_cube(self, cube):
         # Piece Color Order: Left, Right, Bottom, Top, Front, Back
-        cube_pieces = [[ColorDict[cube.faces[36]], Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[0]], Colors.BLACK, ColorDict[cube.faces[29]]],
-                       [Colors.BLACK, Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[1]], Colors.BLACK, ColorDict[cube.faces[28]]],
-                       [Colors.BLACK, ColorDict[cube.faces[20]], Colors.BLACK, ColorDict[cube.faces[2]], Colors.BLACK, ColorDict[cube.faces[27]]],
-                       [ColorDict[cube.faces[37]], Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[3]], Colors.BLACK, Colors.BLACK],
-                       [Colors.BLACK, Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[4]], Colors.BLACK, Colors.BLACK],
-                       [Colors.BLACK, ColorDict[cube.faces[19]], Colors.BLACK, ColorDict[cube.faces[5]], Colors.BLACK, Colors.BLACK],
-                       [ColorDict[cube.faces[38]], Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[6]], ColorDict[cube.faces[9]], Colors.BLACK],
-                       [Colors.BLACK, Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[7]], ColorDict[cube.faces[10]], Colors.BLACK],
-                       [Colors.BLACK, ColorDict[cube.faces[18]], Colors.BLACK, ColorDict[cube.faces[8]], ColorDict[cube.faces[11]], Colors.BLACK],
-                       [ColorDict[cube.faces[39]], Colors.BLACK, Colors.BLACK, Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[32]]],
-                       [Colors.BLACK, Colors.BLACK, Colors.BLACK, Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[31]]],
-                       [Colors.BLACK, ColorDict[cube.faces[23]], Colors.BLACK, Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[30]]],
-                       [ColorDict[cube.faces[40]], Colors.BLACK, Colors.BLACK, Colors.BLACK, Colors.BLACK, Colors.BLACK],
-                       [Colors.BLACK, Colors.BLACK, Colors.BLACK, Colors.BLACK, Colors.BLACK, Colors.BLACK],
-                       [Colors.BLACK, ColorDict[cube.faces[22]], Colors.BLACK, Colors.BLACK, Colors.BLACK, Colors.BLACK],
-                       [ColorDict[cube.faces[41]], Colors.BLACK, Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[12]], Colors.BLACK],
-                       [Colors.BLACK, Colors.BLACK, Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[13]], Colors.BLACK],
-                       [Colors.BLACK, ColorDict[cube.faces[21]], Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[14]], Colors.BLACK],
-                       [ColorDict[cube.faces[42]], Colors.BLACK, ColorDict[cube.faces[45]], Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[35]]],
-                       [Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[48]], Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[34]]],
-                       [Colors.BLACK, ColorDict[cube.faces[26]], ColorDict[cube.faces[51]], Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[33]]],
-                       [ColorDict[cube.faces[43]], Colors.BLACK, ColorDict[cube.faces[46]], Colors.BLACK, Colors.BLACK, Colors.BLACK],
-                       [Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[49]], Colors.BLACK, Colors.BLACK, Colors.BLACK],
-                       [Colors.BLACK, ColorDict[cube.faces[25]], ColorDict[cube.faces[52]], Colors.BLACK, Colors.BLACK, Colors.BLACK],
-                       [ColorDict[cube.faces[44]], Colors.BLACK, ColorDict[cube.faces[47]], Colors.BLACK, ColorDict[cube.faces[15]], Colors.BLACK],
-                       [Colors.BLACK, Colors.BLACK, ColorDict[cube.faces[50]], Colors.BLACK, ColorDict[cube.faces[16]], Colors.BLACK],
-                       [Colors.BLACK, ColorDict[cube.faces[24]], ColorDict[cube.faces[53]], Colors.BLACK, ColorDict[cube.faces[17]], Colors.BLACK]]
+        cube_pieces = [[ColorDict[cube.faces[36]], BLACK, BLACK, ColorDict[cube.faces[0]], BLACK, ColorDict[cube.faces[29]]],
+                       [BLACK, BLACK, BLACK, ColorDict[cube.faces[1]], BLACK, ColorDict[cube.faces[28]]],
+                       [BLACK, ColorDict[cube.faces[20]], BLACK, ColorDict[cube.faces[2]], BLACK, ColorDict[cube.faces[27]]],
+                       [ColorDict[cube.faces[37]], BLACK, BLACK, ColorDict[cube.faces[3]], BLACK, BLACK],
+                       [BLACK, BLACK, BLACK, ColorDict[cube.faces[4]], BLACK, BLACK],
+                       [BLACK, ColorDict[cube.faces[19]], BLACK, ColorDict[cube.faces[5]], BLACK, BLACK],
+                       [ColorDict[cube.faces[38]], BLACK, BLACK, ColorDict[cube.faces[6]], ColorDict[cube.faces[9]], BLACK],
+                       [BLACK, BLACK, BLACK, ColorDict[cube.faces[7]], ColorDict[cube.faces[10]], BLACK],
+                       [BLACK, ColorDict[cube.faces[18]], BLACK, ColorDict[cube.faces[8]], ColorDict[cube.faces[11]], BLACK],
+                       [ColorDict[cube.faces[39]], BLACK, BLACK, BLACK, BLACK, ColorDict[cube.faces[32]]],
+                       [BLACK, BLACK, BLACK, BLACK, BLACK, ColorDict[cube.faces[31]]],
+                       [BLACK, ColorDict[cube.faces[23]], BLACK, BLACK, BLACK, ColorDict[cube.faces[30]]],
+                       [ColorDict[cube.faces[40]], BLACK, BLACK, BLACK, BLACK, BLACK],
+                       [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+                       [BLACK, ColorDict[cube.faces[22]], BLACK, BLACK, BLACK, BLACK],
+                       [ColorDict[cube.faces[41]], BLACK, BLACK, BLACK, ColorDict[cube.faces[12]], BLACK],
+                       [BLACK, BLACK, BLACK, BLACK, ColorDict[cube.faces[13]], BLACK],
+                       [BLACK, ColorDict[cube.faces[21]], BLACK, BLACK, ColorDict[cube.faces[14]], BLACK],
+                       [ColorDict[cube.faces[42]], BLACK, ColorDict[cube.faces[45]], BLACK, BLACK, ColorDict[cube.faces[35]]],
+                       [BLACK, BLACK, ColorDict[cube.faces[48]], BLACK, BLACK, ColorDict[cube.faces[34]]],
+                       [BLACK, ColorDict[cube.faces[26]], ColorDict[cube.faces[51]], BLACK, BLACK, ColorDict[cube.faces[33]]],
+                       [ColorDict[cube.faces[43]], BLACK, ColorDict[cube.faces[46]], BLACK, BLACK, BLACK],
+                       [BLACK, BLACK, ColorDict[cube.faces[49]], BLACK, BLACK, BLACK],
+                       [BLACK, ColorDict[cube.faces[25]], ColorDict[cube.faces[52]], BLACK, BLACK, BLACK],
+                       [ColorDict[cube.faces[44]], BLACK, ColorDict[cube.faces[47]], BLACK, ColorDict[cube.faces[15]], BLACK],
+                       [BLACK, BLACK, ColorDict[cube.faces[50]], BLACK, ColorDict[cube.faces[16]], BLACK],
+                       [BLACK, ColorDict[cube.faces[24]], ColorDict[cube.faces[53]], BLACK, ColorDict[cube.faces[17]], BLACK]]
         for j in range(3):
             for k in range(3):
                 for i in range(3):
@@ -106,7 +119,7 @@ class RubiksVisualizer:
         glEnd()
 
         glBegin(GL_LINES)
-        glColor3fv(Colors.BLACK)
+        glColor3fv(BLACK)
         for edge in edges:
             for vertex in edge:
                 glVertex3fv(vertices[vertex])

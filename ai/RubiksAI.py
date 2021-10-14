@@ -1,12 +1,10 @@
-from threading import Thread
-from model.RubiksCube import RubiksCube
-from visuals.RubiksVisualizer import RubiksVisualizer
-import tensorflow as tf
-from tensorflow import keras
+import time
+
 import ai.RubiksDataset as data
+from datetime import timedelta
 from keras.models import Sequential
 from keras.layers import Dense, Activation
-from model.RubiksMoves import MoveDict
+from ai.RubiksMoves import MoveDict
 
 if __name__ == '__main__':
 
@@ -21,29 +19,23 @@ if __name__ == '__main__':
                   loss=["sparse_categorical_crossentropy"],
                   metrics=["accuracy"])
 
-    train_x, train_y = data.createTrainingData(30, 1)
-    model.fit(train_x, train_y, epochs=10, steps_per_epoch=25, verbose=2)
+    test_loss, test_acc = 1, 0
 
-    print("\nFitting Complete\n\nEvaluating Model\n")
+    start_time = time.time()
+    while test_acc != 1 or test_loss > 0.2:
+        print("\nFitting Model\n")
+        train_x, train_y = data.create_training_data(40, 1)
+        model.fit(train_x, train_y, epochs=10)
+        print("\nEvaluating Model\n")
+        test_x, test_y = data.create_training_data(40, 1)
+        test_loss, test_acc = model.evaluate(test_x, test_y)
 
-    test_x, test_y = data.createTrainingData(30, 1)
-    test_loss, test_acc = model.evaluate(test_x, test_y)
+    print("Training Completed in {}".format(timedelta(seconds=time.time() - start_time)))
 
-    print("Single Solve Test")
-    single_x, single_y = data.createTrainingData(1, 1)
-    if single_y[0] % 2 == 0:
-        inverse_move = MoveDict[single_y[0] + 1]
-    else:
-        inverse_move = MoveDict[single_y[0] - 1]
-    print("Performing single scramble: {}".format(inverse_move))
-    prediction = model.predict(single_x)
-    prediction = prediction[0]
+    print("\nSingle Solve Test\n")
+    single_x, single_y = data.create_training_data(1, 1)
+    print("Performing single scramble: {}".format(MoveDict[single_y[0] + 1] if single_y[0] % 2 == 0 else MoveDict[single_y[0] - 1]))
+    prediction = list(model.predict(single_x)[0])
     print(prediction)
-    max = 0
-    max_i = 0
-    for i in range(len(prediction)):
-        if prediction[i] > max:
-            max = prediction[i]
-            max_i = i
-    print("AI predicts move {}".format(MoveDict[max_i]))
+    print("AI predicts move {}".format(MoveDict[prediction.index(max(prediction))]))
 

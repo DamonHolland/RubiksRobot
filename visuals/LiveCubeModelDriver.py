@@ -1,20 +1,26 @@
 import time
 from visuals.RubiksVisualizer import RubiksVisualizer
 from model.RubiksCube import RubiksCube
-from threading import Thread
 
+def scramble_speed_test():
+    rubiks_cube = RubiksCube()
+    num_scrambles = 0
+    scramble_move_count = 90
+    t_end = time.time() + 1
+    while time.time() < t_end:
+        rubiks_cube.scramble(scramble_move_count)
+        num_scrambles += 1
+    print("\n\nPerformed {} {} move scrambles in 1 second.".format(num_scrambles, scramble_move_count))
 
-def shuffleCube(cube):
+def visualizer_test():
+    rubiks_cube = RubiksCube()
+    rubiks_cube.enable_logging()
+    RubiksVisualizer(rubiks_cube)
     for i in range(30):
-        time.sleep(0.4)
-        cube.scramble(1)
-
+        time.sleep(0.5)
+        rubiks_cube.scramble(1)
 
 if __name__ == '__main__':
-    rubiks_cube = RubiksCube()
-    visuals = RubiksVisualizer()
-    visual_thread = Thread(target=visuals.start, args=[rubiks_cube])
-    visual_thread.start()
-    shuffle_thread = Thread(target=shuffleCube, args=[rubiks_cube])
-    shuffle_thread.start()
+    # scramble_speed_test()
+    visualizer_test()
 

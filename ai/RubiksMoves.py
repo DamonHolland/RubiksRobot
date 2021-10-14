@@ -1,5 +1,3 @@
-from model import RubiksCube
-
 MoveDict = {0: "U",
             1: "U'",
             2: "F",
