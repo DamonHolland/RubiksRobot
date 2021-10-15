@@ -26,4 +26,4 @@ def visualizer_test():
 
 if __name__ == '__main__':
     scramble_speed_test()
-    # visualizer_test()
+    visualizer_test()
