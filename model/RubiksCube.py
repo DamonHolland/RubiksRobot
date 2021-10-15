@@ -27,8 +27,25 @@ class RubiksCube:
 
     def as_string(self):
         string = ""
-        for i in range(len(self.faces)):
-            string += (' ' if i % 9 == 0 else '') + self.HUMAN_READABLE[self.faces[i]]
+        for face in self.faces[0:9]:
+            string += self.HUMAN_READABLE[face]
+        for face in self.faces[18:27]:
+            string += self.HUMAN_READABLE[face]
+        for face in self.faces[9:18]:
+            string += self.HUMAN_READABLE[face]
+        string += self.HUMAN_READABLE[self.faces[47]]
+        string += self.HUMAN_READABLE[self.faces[50]]
+        string += self.HUMAN_READABLE[self.faces[53]]
+        string += self.HUMAN_READABLE[self.faces[46]]
+        string += self.HUMAN_READABLE[self.faces[49]]
+        string += self.HUMAN_READABLE[self.faces[52]]
+        string += self.HUMAN_READABLE[self.faces[45]]
+        string += self.HUMAN_READABLE[self.faces[48]]
+        string += self.HUMAN_READABLE[self.faces[51]]
+        for face in self.faces[36:45]:
+            string += self.HUMAN_READABLE[face]
+        for face in self.faces[27:36]:
+            string += self.HUMAN_READABLE[face]
         return string
 
     def scramble(self, move_count):

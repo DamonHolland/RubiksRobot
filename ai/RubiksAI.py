@@ -1,39 +1,12 @@
 import time
-
 import ai.RubiksDataset as data
+from ai.RubiksSolver import perform_move
 from datetime import timedelta
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 from ai.RubiksMoves import MoveDict
 from model.RubiksCube import RubiksCube
 from visuals.RubiksVisualizer import RubiksVisualizer
-
-def perform_move(cube: RubiksCube, move):
-    if move == "U":
-        cube.rotate_white()
-    elif move == "U'":
-        cube.rotate_white(True)
-    elif move == "F":
-        cube.rotate_green()
-    elif move == "F'":
-        cube.rotate_green(True)
-    elif move == "R":
-        cube.rotate_red()
-    elif move == "R'":
-        cube.rotate_red(True)
-    elif move == "B":
-        cube.rotate_blue()
-    elif move == "B'":
-        cube.rotate_blue(True)
-    elif move == "L":
-        cube.rotate_orange()
-    elif move == "L'":
-        cube.rotate_orange(True)
-    elif move == "D":
-        cube.rotate_yellow()
-    elif move == "D'":
-        cube.rotate_yellow(True)
-
 
 if __name__ == '__main__':
 
