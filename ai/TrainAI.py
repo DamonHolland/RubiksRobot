@@ -12,7 +12,7 @@ def save_model(model, model_name):
 
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 3
+    NUM_SCRAMBLES = 5
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
 

@@ -7,8 +7,8 @@ from visuals.RubiksVisualizer import RubiksVisualizer
 import tensorflow as tf
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 3
-    MODEL_NAME = "3_0.010389532893896103_1.0"
+    NUM_SCRAMBLES = 6
+    MODEL_NAME = "4_0.005543483421206474_1.0"
     model = tf.keras.models.load_model("models/" + MODEL_NAME)
 
     print("\nSingle Solve Test\n")
