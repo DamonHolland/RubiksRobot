@@ -15,13 +15,6 @@ if not cap.isOpened():
 def empty(a):
     pass
 
-
-cv.namedWindow("Parameters")
-cv.resizeWindow("Parameters", 640, 240)
-cv.createTrackbar("Threshold1", "Parameters", 57, 255, empty)
-cv.createTrackbar("Threshold2", "Parameters", 29, 255, empty)
-
-
 def stackFrames(scale, frameArray):
     rows = len(frameArray)
     cols = len(frameArray[0])
@@ -78,7 +71,6 @@ def getContours(frame, frameContour):
             cv.drawContours(frameContour, maxContour, -1, (255, 0, 255), 7)
             peri = cv.arcLength(maxContour, True)
             approx = cv.approxPolyDP(maxContour, 0.02 * peri, True)
-            print(len(approx))
             x, y, w, h = cv.boundingRect(approx)
             cv.rectangle(frameContour, (x, y), (x + w, y + h), (0, 255, 0), 5)
             cv.putText(frameContour, "Points: " + str(len(approx)), (x + w + 20, y + 20), cv.FONT_HERSHEY_COMPLEX, .7,
@@ -86,27 +78,41 @@ def getContours(frame, frameContour):
             cv.putText(frameContour, "Area: " + str(int(maxArea)), (x + w + 20, y + 45), cv.FONT_HERSHEY_COMPLEX, .7,
                        (0, 255, 0), 2)
 
+            return approx
+
 
 while True:
     ret, frame = cap.read()
 
     kernel = np.ones((5, 5))
 
-    threshold1 = cv.getTrackbarPos("Threshold1", "Parameters")
-    threshold2 = cv.getTrackbarPos("Threshold2", "Parameters")
-
     frameContour = frame.copy()
-    frameBlur = cv.GaussianBlur(frame, (7, 7), 1)
     frameGray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-    frameCanny = cv.Canny(frameGray, threshold1, threshold2)
+    frameBlur = cv.GaussianBlur(frameGray, (3, 3), 50, 50)
+
+    frameCanny = cv.Canny(frameGray, 150, 80)
     frameDil = cv.dilate(frameCanny, kernel, iterations=1)
 
-    getContours(frameDil, frameContour)
+    points = getContours(frameDil, frameContour)
+
+    if points is not None:
+        if len(points) == 6:
+            for x in range(len(points)):
+                if x == 5:
+                    start = (points[x][0][0], points[x][0][1])
+                    end = (points[0][0][0], points[0][0][1])
+                else:
+                    start = (points[x][0][0], points[x][0][1])
+                    end = (points[x + 1][0][0], points[x + 1][0][1])
+                if x + 1 == str(len(points)):
+                    start = (points[x][0][0], points[x][0][1])
+
+                frame = cv.line(frame, start, end, (0, 0, 255), 9)
 
     frameStack = stackFrames(0.8, ([frame, frameCanny, frameGray],
-                                   [frameDil, frameContour, frameContour]))
+                                   [frameDil, frameBlur, frameContour]))
 
-    cv.imshow('Rubiks Cube Viewer', frameContour)
+    cv.imshow('Rubiks Cube Viewer', frameStack)
 
     if cv.waitKey(1) == ord('q'):
         break
