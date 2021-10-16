@@ -2,6 +2,7 @@ import random
 import time
 import logging
 import ai.RubiksDataset as data
+import tensorflow as tf
 from datetime import timedelta
 from keras.models import Sequential
 from keras.layers import Dense, Activation
@@ -15,10 +16,13 @@ if __name__ == '__main__':
     NUM_SCRAMBLES = 5
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
+    MODEL_NAME = "4_0.005543483421206474_1.0"
+
+    model = tf.keras.models.load_model("models/" + MODEL_NAME)
 
     logging.getLogger('tensorflow').disabled = True
 
-    model = Sequential()
+    #model = Sequential()
     model.add(Dense(162, input_shape=(162,)))
     model.add(Dense(120))
     model.add(Activation('relu'))
