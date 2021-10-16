@@ -3,6 +3,7 @@ import time
 import kociemba
 from model.RubiksCube import RubiksCube
 from visuals.RubiksVisualizer import RubiksVisualizer
+from RubiksMoves import MoveDecoder, MoveEncoder
 
 def perform_move(cube: RubiksCube, move):
     if move == "U":
@@ -29,40 +30,38 @@ def perform_move(cube: RubiksCube, move):
         cube.rotate_yellow()
     elif move == "D'":
         cube.rotate_yellow(True)
-    elif move == "U2":
-        cube.rotate_white()
-        cube.rotate_white()
-    elif move == "F2":
-        cube.rotate_green()
-        cube.rotate_green()
-    elif move == "R2":
-        cube.rotate_red()
-        cube.rotate_red()
-    elif move == "B2":
-        cube.rotate_blue()
-        cube.rotate_blue()
-    elif move == "L2":
-        cube.rotate_orange()
-        cube.rotate_orange()
-    elif move == "D2":
-        cube.rotate_yellow()
-        cube.rotate_yellow()
 
 def solve(cube: RubiksCube):
     cube_string = cube.as_string().replace('W', 'U').replace('G', 'F').replace('Y', 'D').replace('O', 'L')
-    print(cube_string)
-    solve_moves = kociemba.solve(cube_string).split(' ')
-    move_count = 0
-    for move in solve_moves:
-        move_count += 1
-        print("Performing Move {}".format(move_count))
-        time.sleep(1)
-        perform_move(cube, move)
-    print("Cube solved in {} moves with Kociembas algorithm".format(move_count))
+    solve = kociemba.solve(cube_string).split(' ')
+    for i, item in list(enumerate(solve))[::-1]:  # makes and copy and reverse it (IMPORTANT!)
+        if item == 'U2':
+            solve[i:i + 1] = ['U', 'U']
+        elif item == 'F2':
+            solve[i:i + 1] = ['F', 'F']
+        elif item == 'R2':
+            solve[i:i + 1] = ['R', 'R']
+        elif item == 'L2':
+            solve[i:i + 1] = ['L', 'L']
+        elif item == 'B2':
+            solve[i:i + 1] = ['B', 'B']
+        elif item == 'D2':
+            solve[i:i + 1] = ['D', 'D']
+    for i in range(len(solve)):
+        solve[i] = MoveEncoder[solve[i]]
+    return solve
 
 if __name__ == "__main__":
     rubiks_cube = RubiksCube()
-    rubiks_cube.scramble(1000)
+    rubiks_cube.scramble(50)
     RubiksVisualizer(rubiks_cube)
-    time.sleep(3)
-    solve(rubiks_cube)
+    time.sleep(2)
+    solve_move = solve(rubiks_cube)
+    move_count = 0
+    for move in solve_move:
+        move = MoveDecoder[move]
+        move_count += 1
+        print("Performing Move {}: {}".format(move_count, move))
+        time.sleep(0.05)
+        perform_move(rubiks_cube, move)
+    print("Cube solved in {} moves with Kociembas algorithm".format(move_count))

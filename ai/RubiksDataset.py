@@ -1,4 +1,8 @@
+import random
+
 from model.RubiksCube import RubiksCube
+from ai.RubiksSolver import solve
+
 
 def encode_to_input(cube) -> list:
     encoding = []
@@ -6,12 +10,15 @@ def encode_to_input(cube) -> list:
         encoding += face_color
     return list(encoding)
 
-def create_training_data(data_size, scramble_moves):
+
+def create_training_data(data_size, scramble_moves, cube=None):
     training_input = []
     training_output = []
     for i in range(data_size):
-        new_cube = RubiksCube()
-        new_cube.scramble(scramble_moves)
+        new_cube = cube if cube else RubiksCube()
+        while new_cube.is_solved():
+            new_cube.scramble(random.randint(1, scramble_moves))
         training_input.append(encode_to_input(new_cube))
-        training_output.append(new_cube.last_move + 1 if new_cube.last_move % 2 == 0 else new_cube.last_move - 1)
+        solve_moves = solve(new_cube)
+        training_output.append(solve_moves[0])
     return training_input, training_output

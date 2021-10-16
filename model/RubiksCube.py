@@ -1,5 +1,13 @@
 import random
 
+SOLVED_CUBE = [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0),
+               (0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1),
+               (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0),
+               (0, 1, 1), (0, 1, 1), (0, 1, 1), (0, 1, 1), (0, 1, 1), (0, 1, 1), (0, 1, 1), (0, 1, 1), (0, 1, 1),
+               (1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0),
+               (1, 0, 1), (1, 0, 1), (1, 0, 1), (1, 0, 1), (1, 0, 1), (1, 0, 1), (1, 0, 1), (1, 0, 1), (1, 0, 1)]
+
+
 class RubiksCube:
     WHITE = (0, 0, 0)
     GREEN = (0, 0, 1)
@@ -10,12 +18,12 @@ class RubiksCube:
     CUBE_FACES = [WHITE, GREEN, RED, BLUE, ORANGE, YELLOW]
     PIECE_FACES_PER_SIDE = 9
 
-    HUMAN_READABLE = { WHITE: 'W',
-                       GREEN: 'G',
-                       RED: 'R',
-                       BLUE: 'B',
-                       ORANGE: 'O',
-                       YELLOW: 'Y'}
+    HUMAN_READABLE = {WHITE: 'W',
+                      GREEN: 'G',
+                      RED: 'R',
+                      BLUE: 'B',
+                      ORANGE: 'O',
+                      YELLOW: 'Y'}
 
     def __init__(self):
         self.verbose = False
@@ -51,10 +59,16 @@ class RubiksCube:
     def scramble(self, move_count):
         if self.verbose:
             print("Scrambling Cube {} turns".format(str(move_count)))
-        possible_moves = [lambda cc: self.rotate_white(cc), lambda cc: self.rotate_green(cc), lambda cc: self.rotate_red(cc),
-                          lambda cc: self.rotate_blue(cc), lambda cc: self.rotate_orange(cc), lambda cc: self.rotate_yellow(cc)]
+        possible_moves = [lambda cc: self.rotate_white(cc), lambda cc: self.rotate_green(cc),
+                          lambda cc: self.rotate_red(cc),
+                          lambda cc: self.rotate_blue(cc), lambda cc: self.rotate_orange(cc),
+                          lambda cc: self.rotate_yellow(cc)]
         for i in range(move_count):
-            self.last_move = random.randint(0, 11)
+            last_move_opposite = self.last_move + 1 if self.last_move % 2 == 0 else self.last_move - 1
+            next_move = random.randint(0, 11)
+            while next_move == last_move_opposite:
+                next_move = random.randint(0, 11)
+            self.last_move = next_move
             possible_moves[int(self.last_move / 2)](self.last_move % 2)
 
     def rotate_white(self, cc=False):
@@ -122,3 +136,5 @@ class RubiksCube:
     def disable_logging(self):
         self.verbose = False
 
+    def is_solved(self):
+        return self.faces == SOLVED_CUBE
