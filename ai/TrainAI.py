@@ -69,7 +69,7 @@ if __name__ == '__main__':
         save_model(model, "Training")
         print("Session Time {}".format(timedelta(seconds=time.time() - session_time)))
         print("Running Time {}".format(timedelta(seconds=time.time() - start_time)))
-        print("******************************{}\n".format("*" * (session % 10)))
+        print("******************************{}\n".format("*" * int(session / 10)))
     save_model(model, str(NUM_SCRAMBLES) + "_" + str(test_acc) + "_" + str(test_loss))
     print("Training Completed in {}".format(timedelta(seconds=time.time() - start_time)))
     print("\nModel Saved as {}\n".format(str(NUM_SCRAMBLES) + "_" + str(test_acc) + "_" + str(test_loss)))
