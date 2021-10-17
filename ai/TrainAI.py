@@ -32,7 +32,7 @@ if __name__ == '__main__':
     EVALUATION_SIZE = 128
     # Set To None If you want to create a new model
     # Set to the name of the model if you want to continue training
-    MODEL_NAME = "Training"
+    MODEL_NAME = None
 
     model = load_model(MODEL_NAME)
     logging.getLogger('tensorflow').disabled = True
