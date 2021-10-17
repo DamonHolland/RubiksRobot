@@ -50,6 +50,7 @@ if __name__ == '__main__':
                       metrics=["accuracy"])
 
     start_time = time.time()
+    session_time = time.time()
     test_loss, test_acc = 1, 0
     session = 0
     while test_acc < ACCURACY_GOAL or test_loss > LOSS_GOAL:
@@ -61,5 +62,6 @@ if __name__ == '__main__':
         test_x, test_y = Data.create_training_data(EVALUATION_SIZE, NUM_SCRAMBLES)
         test_loss, test_acc = model.evaluate(test_x, test_y)
         save_model(model, "Training")
+        print("Session Completed in {}".format(timedelta(seconds=time.time() - session_time)))
     save_model(model, str(NUM_SCRAMBLES) + "_" + str(test_acc) + "_" + str(test_loss))
     print("Training Completed in {}".format(timedelta(seconds=time.time() - start_time)))
