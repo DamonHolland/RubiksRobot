@@ -2,11 +2,13 @@ from threading import Thread
 
 import pygame
 import numpy as np
+from OpenGL.GL import glVertex3fv, glEnable, GL_DEPTH_TEST, glTranslatef, glRotatef, glClearColor, glClear, \
+    GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, glBegin, GL_QUADS, glColor3fv, glEnd, GL_LINES
+from OpenGL.raw.GLU import gluPerspective
+
 from model.RubiksCube import RubiksCube
 from pygame.locals import *
 from math import *
-from OpenGL.GL import *
-from OpenGL.GLU import *
 
 ColorDict = {RubiksCube.WHITE: (1, 1, 1),
              RubiksCube.GREEN: (0, 1, 0),
