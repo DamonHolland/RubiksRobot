@@ -6,6 +6,7 @@ from model.RubiksCube import RubiksCube
 from RubiksMoves import MoveDecoder, MoveEncoder
 
 def perform_move(cube: RubiksCube, move):
+    move = MoveDecoder[move]
     if move == "U":
         cube.rotate_white()
     elif move == "U'":

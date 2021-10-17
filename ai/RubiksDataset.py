@@ -1,10 +1,7 @@
-import random
 import time
 from datetime import timedelta
-
 from model.RubiksCube import RubiksCube
-from ai.RubiksSolver import solve
-
+from ai.RubiksSolver import solve, perform_move
 
 def encode_to_input(cube) -> list:
     encoding = []
@@ -16,13 +13,17 @@ def encode_to_input(cube) -> list:
 def create_training_data(data_size, scramble_moves, cube=None):
     training_input = []
     training_output = []
-    for i in range(data_size):
-        new_cube = cube if cube else RubiksCube()
+    new_cube = cube if cube else RubiksCube()
+    while len(training_input) < data_size:
         while new_cube.is_solved():
-            new_cube.scramble(random.randint(1, scramble_moves))
-        training_input.append(encode_to_input(new_cube))
+            new_cube.scramble(scramble_moves)
         solve_moves = solve(new_cube)
-        training_output.append(solve_moves[0])
+        for move in solve_moves:
+            training_input.append(encode_to_input(new_cube))
+            training_output.append(move)
+            perform_move(new_cube, move)
+        if not new_cube.is_solved():
+            print("Cube NOT SOLVED ERROR")
     return training_input, training_output
 
 if __name__ == '__main__':

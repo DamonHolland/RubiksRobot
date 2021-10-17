@@ -7,8 +7,8 @@ from visuals.RubiksVisualizer import RubiksVisualizer
 import tensorflow as tf
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 6
-    MODEL_NAME = "4_0.005543483421206474_1.0"
+    NUM_SCRAMBLES = 3
+    MODEL_NAME = "2_1.0_0.00021674610616173595"
     model = tf.keras.models.load_model("models/" + MODEL_NAME)
 
     print("\nSingle Solve Test\n")
@@ -23,9 +23,9 @@ if __name__ == '__main__':
         num_moves += 1
         prediction = list(model.predict([data.encode_to_input(cube)])[0])
         time.sleep(0.1)
-        prediction_move = MoveDecoder[prediction.index(max(prediction))]
+        prediction_move = prediction.index(max(prediction))
         perform_move(cube, prediction_move)
-        print("AI predicts move {}".format(prediction_move))
+        print("AI predicts move {}".format(MoveDecoder[prediction_move]))
     if cube.is_solved():
         print("AI Solved cube in {} Moves.".format(num_moves))
     else:
