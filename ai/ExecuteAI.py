@@ -7,8 +7,8 @@ from visuals.RubiksVisualizer import RubiksVisualizer
 import tensorflow as tf
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 2
-    MODEL_NAME = "2_1.0_0.00021674610616173595"
+    NUM_SCRAMBLES = 5
+    MODEL_NAME = "4_1.0_0.029323436319828033"
     EVALUATION_COUNT = 10
     MAX_MOVES = 30
     model = tf.keras.models.load_model("models/" + MODEL_NAME)
