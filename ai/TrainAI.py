@@ -27,7 +27,7 @@ if __name__ == '__main__':
     NUM_SCRAMBLES = 3
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
-    EPOCH_SIZE = 128
+    EPOCH_SIZE = 1280
     NUM_EPOCHS = 10
     EVALUATION_SIZE = 128
     # Set To None If you want to create a new model
@@ -49,7 +49,6 @@ if __name__ == '__main__':
                       loss=["sparse_categorical_crossentropy"],
                       metrics=["accuracy"])
 
-    os.system('cls')
     start_time = time.time()
     test_loss, test_acc = 1, 0
     session = 0
@@ -61,5 +60,6 @@ if __name__ == '__main__':
         print("\nEvaluating Model - Session {}\n".format(session))
         test_x, test_y = Data.create_training_data(EVALUATION_SIZE, NUM_SCRAMBLES)
         test_loss, test_acc = model.evaluate(test_x, test_y)
+        save_model(model, "Training")
     save_model(model, str(NUM_SCRAMBLES) + "_" + str(test_acc) + "_" + str(test_loss))
     print("Training Completed in {}".format(timedelta(seconds=time.time() - start_time)))
