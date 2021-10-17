@@ -12,7 +12,6 @@ from keras.layers import Dense, Activation, InputLayer
 
 def save_model(model_to_save, model_name):
     model_to_save.save("models/" + model_name)
-    print("\nModel Saved as {}\n".format(model_name))
 
 
 def load_model(model_name):
@@ -25,11 +24,7 @@ def load_model(model_name):
 def create_model():
     new_model = Sequential()
     new_model.add(InputLayer(324))
-    new_model.add(Dense(1024))
-    new_model.add(Activation('relu'))
-    new_model.add(Dense(2048))
-    new_model.add(Activation('relu'))
-    new_model.add(Dense(1024))
+    new_model.add(Dense(228))
     new_model.add(Activation('relu'))
     new_model.add(Dense(12))
     new_model.add(Activation('softmax'))
@@ -42,9 +37,9 @@ if __name__ == '__main__':
     NUM_SCRAMBLES = 2
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
-    BATCH_SIZE = 64
+    BATCH_SIZE = 100
     NUM_EPOCHS = 10
-    EVALUATION_SIZE = 128
+    EVALUATION_SIZE = 100
     # Set To None If you want to create a new model
     # Set to the name of the model if you want to continue training
     MODEL_NAME = None
@@ -60,14 +55,17 @@ if __name__ == '__main__':
     while test_acc < ACCURACY_GOAL or test_loss > LOSS_GOAL:
         session_time = time.time()
         session += 1
-        print("\nFitting Model Session {}\n".format(session))
+        print("********** Session {} **********".format(session))
+        print("Fitting Model".format(session))
         train_x, train_y = Data.create_training_data(BATCH_SIZE, NUM_SCRAMBLES)
-        model.fit(train_x, train_y, epochs=NUM_EPOCHS, verbose=2)
-        print("\nEvaluating Model - Session {}\n".format(session))
+        model.fit(train_x, train_y, epochs=NUM_EPOCHS, verbose=0)
+        print("Evaluating Model".format(session))
         test_x, test_y = Data.create_training_data(EVALUATION_SIZE, NUM_SCRAMBLES)
         test_loss, test_acc = model.evaluate(test_x, test_y)
         save_model(model, "Training")
         print("Session Time {}".format(timedelta(seconds=time.time() - session_time)))
-        print("Total Time {}".format(timedelta(seconds=time.time() - start_time)))
+        print("Running Time {}".format(timedelta(seconds=time.time() - start_time)))
+        print("******************************{}\n".format("*" * (session % 10)))
     save_model(model, str(NUM_SCRAMBLES) + "_" + str(test_acc) + "_" + str(test_loss))
     print("Training Completed in {}".format(timedelta(seconds=time.time() - start_time)))
+    print("\nModel Saved as {}\n".format(str(NUM_SCRAMBLES) + "_" + str(test_acc) + "_" + str(test_loss)))

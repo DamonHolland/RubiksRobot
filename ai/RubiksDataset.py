@@ -3,6 +3,7 @@ from datetime import timedelta
 from model.RubiksCube import RubiksCube
 from ai.RubiksSolver import solve, perform_move
 
+
 def encode_to_input(cube) -> list:
     encoding = []
     for face_color in cube.faces:
@@ -19,15 +20,15 @@ def create_training_data(data_size, scramble_moves, cube=None):
             new_cube.scramble(scramble_moves)
         solve_moves = solve(new_cube)
         for move in solve_moves:
-            training_input.append(encode_to_input(new_cube))
-            training_output.append(move)
+            new_input = encode_to_input(new_cube)
+            if training_input.count(new_input) == 0:
+                training_input.append(new_input)
+                training_output.append(move)
             perform_move(new_cube, move)
-        if not new_cube.is_solved():
-            print("Cube NOT SOLVED ERROR")
     return training_input, training_output
+
 
 if __name__ == '__main__':
     start_time = time.time()
     create_training_data(10000, 3, cube=None)
     print("Data created in {}".format(timedelta(seconds=time.time() - start_time)))
-
