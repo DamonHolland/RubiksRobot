@@ -21,15 +21,15 @@ def load_model(model_name):
 
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 3
+    NUM_SCRAMBLES = 4
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
-    EPOCH_SIZE = 64
+    EPOCH_SIZE = 128
     NUM_EPOCHS = 10
     EVALUATION_SIZE = 128
     # Set To None If you want to create a new model
     # Set to the name of the model if you want to continue training
-    MODEL_NAME = None
+    MODEL_NAME = "Training"
 
     model = load_model(MODEL_NAME)
     logging.getLogger('tensorflow').disabled = True
@@ -37,7 +37,11 @@ if __name__ == '__main__':
     if not model:
         model = Sequential()
         model.add(Dense(162, input_shape=(162,)))
-        model.add(Dense(64))
+        model.add(Dense(1024))
+        model.add(Activation('relu'))
+        model.add(Dense(2048))
+        model.add(Activation('relu'))
+        model.add(Dense(1024))
         model.add(Activation('relu'))
         model.add(Dense(12))
         model.add(Activation('sigmoid'))
