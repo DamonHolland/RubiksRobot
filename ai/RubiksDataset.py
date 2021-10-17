@@ -1,4 +1,6 @@
 import random
+import time
+from datetime import timedelta
 
 from model.RubiksCube import RubiksCube
 from ai.RubiksSolver import solve
@@ -22,3 +24,9 @@ def create_training_data(data_size, scramble_moves, cube=None):
         solve_moves = solve(new_cube)
         training_output.append(solve_moves[0])
     return training_input, training_output
+
+if __name__ == '__main__':
+    start_time = time.time()
+    create_training_data(10000, 3, cube=None)
+    print("Data created in {}".format(timedelta(seconds=time.time() - start_time)))
+

@@ -40,11 +40,7 @@ if __name__ == '__main__':
     if not model:
         model = Sequential()
         model.add(Dense(162, input_shape=(162,)))
-        model.add(Dense(1024))
-        model.add(Activation('relu'))
-        model.add(Dense(2048))
-        model.add(Activation('relu'))
-        model.add(Dense(1024))
+        model.add(Dense(120))
         model.add(Activation('relu'))
         model.add(Dense(12))
         model.add(Activation('sigmoid'))
