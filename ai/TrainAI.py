@@ -27,9 +27,9 @@ if __name__ == '__main__':
     NUM_SCRAMBLES = 3
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
-    EPOCH_SIZE = 1280
+    EPOCH_SIZE = 100
     NUM_EPOCHS = 10
-    EVALUATION_SIZE = 128
+    EVALUATION_SIZE = 100
     # Set To None If you want to create a new model
     # Set to the name of the model if you want to continue training
     MODEL_NAME = None
