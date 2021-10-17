@@ -1,7 +1,10 @@
+import os.path
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import ai.RubiksDataset as Data
 import logging
 import os
 import time
-import ai.RubiksDataset as Data
 import tensorflow as tf
 from datetime import timedelta
 from keras import Sequential
