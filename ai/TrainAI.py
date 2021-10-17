@@ -24,7 +24,11 @@ def load_model(model_name):
 def create_model():
     new_model = Sequential()
     new_model.add(InputLayer(324))
-    new_model.add(Dense(228))
+    new_model.add(Dense(1024))
+    new_model.add(Activation('relu'))
+    new_model.add(Dense(2048))
+    new_model.add(Activation('relu'))
+    new_model.add(Dense(1024))
     new_model.add(Activation('relu'))
     new_model.add(Dense(12))
     new_model.add(Activation('softmax'))
