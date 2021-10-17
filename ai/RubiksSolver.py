@@ -2,7 +2,7 @@ import time
 
 import kociemba
 from model.RubiksCube import RubiksCube
-from visuals.RubiksVisualizer import RubiksVisualizer
+# from visuals.RubiksVisualizer import RubiksVisualizer
 from RubiksMoves import MoveDecoder, MoveEncoder
 
 def perform_move(cube: RubiksCube, move):
@@ -51,17 +51,17 @@ def solve(cube: RubiksCube):
         solve[i] = MoveEncoder[solve[i]]
     return solve
 
-if __name__ == "__main__":
-    rubiks_cube = RubiksCube()
-    rubiks_cube.scramble(50)
-    RubiksVisualizer(rubiks_cube)
-    time.sleep(2)
-    solve_move = solve(rubiks_cube)
-    move_count = 0
-    for move in solve_move:
-        move = MoveDecoder[move]
-        move_count += 1
-        print("Performing Move {}: {}".format(move_count, move))
-        time.sleep(0.05)
-        perform_move(rubiks_cube, move)
-    print("Cube solved in {} moves with Kociembas algorithm".format(move_count))
+# if __name__ == "__main__":
+#     rubiks_cube = RubiksCube()
+#     rubiks_cube.scramble(50)
+#     RubiksVisualizer(rubiks_cube)
+#     time.sleep(2)
+#     solve_move = solve(rubiks_cube)
+#     move_count = 0
+#     for move in solve_move:
+#         move = MoveDecoder[move]
+#         move_count += 1
+#         print("Performing Move {}: {}".format(move_count, move))
+#         time.sleep(0.05)
+#         perform_move(rubiks_cube, move)
+#     print("Cube solved in {} moves with Kociembas algorithm".format(move_count))
