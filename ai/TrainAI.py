@@ -21,7 +21,7 @@ def load_model(model_name):
 
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 4
+    NUM_SCRAMBLES = 3
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
     EPOCH_SIZE = 128
