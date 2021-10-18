@@ -1,6 +1,5 @@
 numpy==1.19.5
 pygame==2.0.2
 keras==2.6.0
-kociemba==1.2.1
 tensorflow_gpu==2.6.0
 PyOpenGL==3.1.5
