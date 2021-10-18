@@ -24,13 +24,8 @@ def load_model(model_name):
 def create_model():
     new_model = Sequential()
     new_model.add(InputLayer(324))
-    new_model.add(Dense(1024))
+    new_model.add(Dense(228))
     new_model.add(Activation('relu'))
-    new_model.add(Dense(2048))
-    new_model.add(Activation('relu'))
-    new_model.add(Dense(1024))
-    new_model.add(Activation('relu'))
-    new_model.add(Dense(12))
     new_model.add(Activation('softmax'))
     new_model.compile(optimizer="Adam", loss=["sparse_categorical_crossentropy"], metrics=["accuracy"])
     new_model.summary()
@@ -38,15 +33,15 @@ def create_model():
 
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 5
+    NUM_SCRAMBLES = 4
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
-    BATCH_SIZE = 100
+    BATCH_SIZE = 1000
     NUM_EPOCHS = 10
     EVALUATION_SIZE = 100
     # Set To None If you want to create a new model
     # Set to the name of the model if you want to continue training
-    MODEL_NAME = "4_1.0_0.029323436319828033"
+    MODEL_NAME = None
 
     model = load_model(MODEL_NAME) if MODEL_NAME else create_model()
 
