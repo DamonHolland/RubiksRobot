@@ -47,6 +47,8 @@ def create_training_data(data_size, scramble_moves, cube=None):
                 new_cube.scramble(1)
                 scramble.append(new_cube.last_move)
         scramble.reverse()
+        for i in range(len(scramble)):
+            scramble[i] = scramble[i] + 1 if scramble[i] % 2 == 0 else scramble[i] - 1
         solve_moves = scramble
         for move in solve_moves:
             new_input = encode_to_input(new_cube)
