@@ -35,7 +35,8 @@ def create_training_data(data_size, scramble_moves):
         if fail_count > 10:
             data_size = len(training_input)
             print("Requested Data too large, not enough permutations. Only {} Found".format(len(training_input)))
-    return np.array(training_input), np.array(training_output)
+    shuffle = np.random.permutation(len(training_input))
+    return np.array(training_input)[shuffle], np.array(training_output)[shuffle]
 
 
 if __name__ == '__main__':
