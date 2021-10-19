@@ -24,9 +24,11 @@ def load_model(model_name):
 
 def create_model():
     new_model = Sequential()
-    new_model.add(Dense(228, input_shape=(324,), activation='relu'))
-    new_model.add(Dense(12, input_shape=(228,), activation='softmax'))
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0003)
+    new_model.add(Dense(1024, input_shape=(324,), activation='relu'))
+    new_model.add(Dense(2048, input_shape=(1024,), activation='relu'))
+    new_model.add(Dense(1024, input_shape=(2048,), activation='relu'))
+    new_model.add(Dense(12, input_shape=(1024,), activation='softmax'))
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
     new_model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     new_model.summary()
     return new_model
@@ -36,12 +38,12 @@ if __name__ == '__main__':
     NUM_SCRAMBLES = 5
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
-    BATCH_SIZE = 10000
+    BATCH_SIZE = 1000
     NUM_EPOCHS = 10
-    EVALUATION_SIZE = 100
+    EVALUATION_SIZE = 500
     # Set To None If you want to create a new model
     # Set to the name of the model if you want to continue training
-    MODEL_NAME = "4_1.0_0.0286953654140234"
+    MODEL_NAME = None
 
     model = load_model(MODEL_NAME) if MODEL_NAME else create_model()
 
@@ -63,7 +65,7 @@ if __name__ == '__main__':
         test_loss, test_acc = model.evaluate(test_x, test_y)
         print("Session Time {}".format(timedelta(seconds=time.time() - session_time)))
         print("Running Time {}".format(timedelta(seconds=time.time() - start_time)))
-        print("******************************{}\n".format("*" * int(session / 10)))
+        print("******************************{}\n".format("*" * len(str(session))))
         save_model(model, "Training")
     save_model(model, str(NUM_SCRAMBLES) + "_" + str(test_acc) + "_" + str(test_loss))
     print("Training Completed in {}".format(timedelta(seconds=time.time() - start_time)))

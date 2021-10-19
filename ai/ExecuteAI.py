@@ -9,7 +9,7 @@ import numpy as np
 
 if __name__ == '__main__':
     NUM_SCRAMBLES = 5
-    MODEL_NAME = "5_1.0_0.01318588387221098"
+    MODEL_NAME = "5_1.0_0.0031858792062848806"
     EVALUATION_COUNT = 10
     MAX_MOVES = 30
     model = tf.keras.models.load_model("models/" + MODEL_NAME)
