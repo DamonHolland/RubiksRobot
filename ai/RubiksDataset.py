@@ -41,8 +41,8 @@ def create_training_data(data_size, scramble_moves, cube=None):
     fail_count = 0
     new_cube = cube if cube else RubiksCube()
     while len(training_input) < data_size:
-        scramble = []
         while new_cube.is_solved():
+            scramble = []
             for i in range(scramble_moves):
                 new_cube.scramble(1)
                 scramble.append(new_cube.last_move)
