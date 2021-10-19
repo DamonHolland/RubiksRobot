@@ -1,6 +1,7 @@
 import time
 from datetime import timedelta
 from model.RubiksCube import RubiksCube
+import numpy as np
 
 def perform_move(cube: RubiksCube, move):
     if move == 0:
@@ -63,7 +64,7 @@ def create_training_data(data_size, scramble_moves, cube=None):
         if fail_count > data_size:
             data_size = len(training_input)
             print("Requested Data too large, not enough permutations")
-    return training_input, training_output
+    return np.array(training_input), np.array(training_output)
 
 
 if __name__ == '__main__':
