@@ -36,7 +36,7 @@ if __name__ == '__main__':
     NUM_SCRAMBLES = 4
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
-    BATCH_SIZE = 500
+    BATCH_SIZE = 1000
     NUM_EPOCHS = 10
     EVALUATION_SIZE = 100
     # Set To None If you want to create a new model
