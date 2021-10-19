@@ -26,6 +26,7 @@ def create_model():
     new_model.add(InputLayer(324))
     new_model.add(Dense(228))
     new_model.add(Activation('relu'))
+    new_model.add(Dense(12))
     new_model.add(Activation('softmax'))
     new_model.compile(optimizer="Adam", loss=["sparse_categorical_crossentropy"], metrics=["accuracy"])
     new_model.summary()
