@@ -33,15 +33,15 @@ def create_model():
 
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 4
+    NUM_SCRAMBLES = 5
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
-    BATCH_SIZE = 1000
+    BATCH_SIZE = 10000
     NUM_EPOCHS = 10
     EVALUATION_SIZE = 100
     # Set To None If you want to create a new model
     # Set to the name of the model if you want to continue training
-    MODEL_NAME = None
+    MODEL_NAME = "4_1.0_0.0286953654140234"
 
     model = load_model(MODEL_NAME) if MODEL_NAME else create_model()
 
@@ -64,6 +64,7 @@ if __name__ == '__main__':
         print("Session Time {}".format(timedelta(seconds=time.time() - session_time)))
         print("Running Time {}".format(timedelta(seconds=time.time() - start_time)))
         print("******************************{}\n".format("*" * int(session / 10)))
+        save_model(model, "Training")
     save_model(model, str(NUM_SCRAMBLES) + "_" + str(test_acc) + "_" + str(test_loss))
     print("Training Completed in {}".format(timedelta(seconds=time.time() - start_time)))
     print("\nModel Saved as {}\n".format(str(NUM_SCRAMBLES) + "_" + str(test_acc) + "_" + str(test_loss)))

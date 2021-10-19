@@ -5,10 +5,11 @@ from ai.RubiksMoves import MoveDecoder
 from model.RubiksCube import RubiksCube
 from visuals.RubiksVisualizer import RubiksVisualizer
 import tensorflow as tf
+import numpy as np
 
 if __name__ == '__main__':
     NUM_SCRAMBLES = 5
-    MODEL_NAME = "4_1.0_0.029323436319828033"
+    MODEL_NAME = "5_1.0_0.01318588387221098"
     EVALUATION_COUNT = 10
     MAX_MOVES = 30
     model = tf.keras.models.load_model("models/" + MODEL_NAME)
@@ -21,7 +22,7 @@ if __name__ == '__main__':
         num_moves = 0
         while not cube.is_solved() and num_moves < MAX_MOVES:
             num_moves += 1
-            prediction = list(model.predict([data.encode_to_input(cube)])[0])
+            prediction = list(model.predict(np.array([data.encode_to_input(cube)]))[0])
             prediction_move = prediction.index(max(prediction))
             perform_move(cube, prediction_move)
         if cube.is_solved():
@@ -37,8 +38,8 @@ if __name__ == '__main__':
     num_moves = 0
     while not cube.is_solved() and num_moves < MAX_MOVES:
         num_moves += 1
-        prediction = list(model.predict([data.encode_to_input(cube)])[0])
-        time.sleep(0.1)
+        prediction = list(model.predict(np.array([data.encode_to_input(cube)]))[0])
+        time.sleep(0.5)
         prediction_move = prediction.index(max(prediction))
         perform_move(cube, prediction_move)
         print("AI predicts move {}".format(MoveDecoder[prediction_move]))
