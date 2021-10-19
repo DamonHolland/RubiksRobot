@@ -7,7 +7,8 @@ import time
 import tensorflow as tf
 from datetime import timedelta
 from keras import Sequential
-from keras.layers import Dense, Activation, InputLayer
+from keras.layers import Dense
+import os
 
 
 def save_model(model_to_save, model_name):
@@ -23,11 +24,10 @@ def load_model(model_name):
 
 def create_model():
     new_model = Sequential()
-    new_model.add(InputLayer(324))
-    new_model.add(Dense(228))
-    new_model.add(Activation('relu'))
-    new_model.add(Activation('softmax'))
-    new_model.compile(optimizer="Adam", loss=["sparse_categorical_crossentropy"], metrics=["accuracy"])
+    new_model.add(Dense(228, input_shape=(324,), activation='relu'))
+    new_model.add(Dense(12, input_shape=(228,), activation='softmax'))
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0003)
+    new_model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     new_model.summary()
     return new_model
 
@@ -61,7 +61,6 @@ if __name__ == '__main__':
         print("Evaluating Model".format(session))
         test_x, test_y = Data.create_training_data(EVALUATION_SIZE, NUM_SCRAMBLES)
         test_loss, test_acc = model.evaluate(test_x, test_y)
-        save_model(model, "Training")
         print("Session Time {}".format(timedelta(seconds=time.time() - session_time)))
         print("Running Time {}".format(timedelta(seconds=time.time() - start_time)))
         print("******************************{}\n".format("*" * int(session / 10)))

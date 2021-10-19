@@ -2,7 +2,7 @@ import time
 from datetime import timedelta
 from model.RubiksCube import RubiksCube
 from ai.RubiksSolver import solve, perform_move
-
+import numpy as np
 
 def encode_to_input(cube) -> list:
     encoding = []
@@ -33,7 +33,7 @@ def create_training_data(data_size, scramble_moves, cube=None):
         if fail_count > data_size:
             data_size = len(training_input)
             print("Requested Data too large, not enough permutations")
-    return training_input, training_output
+    return np.array(training_input), np.array(training_output)
 
 
 if __name__ == '__main__':
