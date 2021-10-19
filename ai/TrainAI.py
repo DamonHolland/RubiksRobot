@@ -62,7 +62,6 @@ if __name__ == '__main__':
         print("Evaluating Model".format(session))
         test_x, test_y = Data.create_training_data(EVALUATION_SIZE, NUM_SCRAMBLES)
         test_loss, test_acc = model.evaluate(test_x, test_y)
-        save_model(model, "Training")
         print("Session Time {}".format(timedelta(seconds=time.time() - session_time)))
         print("Running Time {}".format(timedelta(seconds=time.time() - start_time)))
         print("******************************{}\n".format("*" * int(session / 10)))
