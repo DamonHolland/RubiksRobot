@@ -33,12 +33,12 @@ def create_model():
 
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 5
+    NUM_SCRAMBLES = 4
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1
-    BATCH_SIZE = 100000
+    BATCH_SIZE = 500
     NUM_EPOCHS = 10
-    EVALUATION_SIZE = 500
+    EVALUATION_SIZE = 100
     # Set To None If you want to create a new model
     # Set to the name of the model if you want to continue training
     MODEL_NAME = None

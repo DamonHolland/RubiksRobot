@@ -11,12 +11,12 @@ def encode_to_input(cube) -> list:
     return list(encoding)
 
 
-def create_training_data(data_size, scramble_moves, cube=None):
+def create_training_data(data_size, scramble_moves):
     training_input = []
     training_output = []
     fail_count = 0
-    new_cube = cube if cube else RubiksCube()
     while len(training_input) < data_size:
+        new_cube = RubiksCube()
         while new_cube.is_solved():
             new_cube.scramble(scramble_moves)
         solve_moves = solve(new_cube)
@@ -25,18 +25,20 @@ def create_training_data(data_size, scramble_moves, cube=None):
             if training_input.count(new_input) == 0:
                 training_input.append(new_input)
                 training_output.append(move)
+                perform_move(new_cube, move)
                 fail_count = 0
             else:
                 fail_count += 1
-            perform_move(new_cube, move)
+                break
         # To break if there arent as many permutations as there is requested data
-        if fail_count > data_size:
+        # Will Fail if all fails to find new data 10 times in a row
+        if fail_count > 10:
             data_size = len(training_input)
-            print("Requested Data too large, not enough permutations")
+            print("Requested Data too large, not enough permutations. Only {} Found".format(len(training_input)))
     return np.array(training_input), np.array(training_output)
 
 
 if __name__ == '__main__':
     start_time = time.time()
-    create_training_data(10000, 3, cube=None)
+    create_training_data(10000, 5)
     print("Data created in {}".format(timedelta(seconds=time.time() - start_time)))
