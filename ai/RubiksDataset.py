@@ -25,7 +25,7 @@ def create_training_data(data_size, scramble_moves):
         for move in solve_moves:
             new_input = encode_to_input(new_cube)
             try:
-                check_exists = training_data[tuple(new_input)]
+                _check_exists = training_data[tuple(new_input)]
                 fail_count += 1
                 break
             except KeyError:
@@ -37,16 +37,17 @@ def create_training_data(data_size, scramble_moves):
         if fail_count > 10:
             data_size = len(training_data.items())
             print("Requested Data too large, not enough permutations. Only {} Found".format(len(training_data.items())))
-    input = []
-    output = []
+            print("Requesting more data than permutations can lead to slower data generation.")
+    nn_input = []
+    nn_output = []
     for key, value in training_data.items():
-        input.append(list(key))
-        output.append(value)
-    shuffle = np.random.permutation(len(input))
-    return np.array(input)[shuffle], np.array(output)[shuffle]
+        nn_input.append(list(key))
+        nn_output.append(value)
+    shuffle = np.random.permutation(len(nn_input))
+    return np.array(nn_input)[shuffle], np.array(nn_output)[shuffle]
 
 
 if __name__ == '__main__':
     start_time = time.time()
-    create_training_data(10000, 5)
+    create_training_data(1000, 4)
     print("Data created in {}".format(timedelta(seconds=time.time() - start_time)))
