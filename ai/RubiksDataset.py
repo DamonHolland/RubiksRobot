@@ -25,11 +25,11 @@ def create_training_data(data_size, scramble_moves):
         for move in solve_moves:
             new_input = encode_to_input(new_cube)
             try:
-                check_exists = training_data[str(new_input)]
+                check_exists = training_data[tuple(new_input)]
                 fail_count += 1
                 break
             except KeyError:
-                training_data[str(new_input)] = move
+                training_data[tuple(new_input)] = move
                 perform_move(new_cube, move)
                 fail_count = 0
         # To break if there arent as many permutations as there is requested data
@@ -40,7 +40,7 @@ def create_training_data(data_size, scramble_moves):
     input = []
     output = []
     for key, value in training_data.items():
-        input.append(key)
+        input.append(list(key))
         output.append(value)
     shuffle = np.random.permutation(len(input))
     return np.array(input)[shuffle], np.array(output)[shuffle]
