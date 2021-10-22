@@ -19,7 +19,7 @@ def encode_to_input(cube) -> list:
 def create_categorical_training_data(data_size, scramble_moves):
     training_data = dict()
     fail_count = 0
-    training_data[RubiksCube()] = 0
+    training_data[tuple(encode_to_input(RubiksCube()))] = 0
     while len(training_data.items()) < data_size:
         # Scramble the cube
         new_cube = RubiksCube()
@@ -31,12 +31,12 @@ def create_categorical_training_data(data_size, scramble_moves):
         while len(solve_moves) > 0:
             try:
                 # If the cube state already exists, end this solve
-                _check_exists = training_data[new_cube]
+                _check_exists = training_data[tuple(encode_to_input(new_cube))]
                 fail_count += 1
                 break
             except KeyError:
                 # If the cube state does not already exist in the input data, continue
-                training_data[new_cube] = len(solve_moves)
+                training_data[tuple(encode_to_input(new_cube))] = len(solve_moves)
                 perform_move(new_cube, solve_moves.pop(0))
                 fail_count = 0
         # To break if there arent as many permutations as there is requested data
@@ -46,7 +46,7 @@ def create_categorical_training_data(data_size, scramble_moves):
             print("Requested Data too large, not enough permutations. Only {} Found".format(len(training_data)))
             print("Requesting more data than permutations can lead to slower data generation.")
 
-    nn_input = np.array([encode_to_input(key) for key in list(training_data.keys())])
+    nn_input = np.array([list(key) for key in list(training_data.keys())])
     nn_output = np.array(list(training_data.values()))
     shuffle = np.random.permutation(len(training_data))
     return np.array(nn_input)[shuffle], np.array(nn_output)[shuffle]
@@ -54,8 +54,8 @@ def create_categorical_training_data(data_size, scramble_moves):
 
 if __name__ == '__main__':
     start_time = time.time()
-    SCRAMBLE_TEST = 7
-    x, y = create_categorical_training_data(4096, SCRAMBLE_TEST)
+    SCRAMBLE_TEST = 5
+    x, y = create_categorical_training_data(1000, SCRAMBLE_TEST)
     max_moves = max(y) + 1
     print("Data created in {}".format(timedelta(seconds=time.time() - start_time)))
     print("Required nodes for {} moves is {}".format(SCRAMBLE_TEST, max_moves))

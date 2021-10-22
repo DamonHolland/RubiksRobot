@@ -8,7 +8,6 @@ import tensorflow as tf
 from datetime import timedelta
 from keras import Sequential
 from keras.layers import Dense, InputLayer, Dropout
-import os
 
 
 def save_model(model_to_save, model_name):
@@ -18,13 +17,9 @@ def save_model(model_to_save, model_name):
 def create_model():
     new_model = Sequential()
     new_model.add(InputLayer(324,))
-    new_model.add(Dense(1024, activation='relu'))
+    new_model.add(Dense(324, activation='relu'))
     new_model.add(Dropout(0.3))
-    new_model.add(Dense(2048, activation='relu'))
-    new_model.add(Dropout(0.3))
-    new_model.add(Dense(1024, activation='relu'))
-    new_model.add(Dropout(0.3))
-    new_model.add(Dense(30, activation='softmax'))
+    new_model.add(Dense(26, activation='softmax'))
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
     new_model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     new_model.summary()
@@ -32,15 +27,14 @@ def create_model():
 
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 7
+    NUM_SCRAMBLES = 5
     LOSS_GOAL = 0.2
-    ACCURACY_GOAL = 0.98
+    ACCURACY_GOAL = 0.995
     BATCH_SIZE = 4096
     NUM_EPOCHS = 10
     EVALUATION_SIZE = 512
 
     model = create_model()
-
     logging.getLogger('tensorflow').disabled = True
     print("\nThere are approximately {} permutations for {} scrambles.\n".format(12 * pow(11, NUM_SCRAMBLES - 1), NUM_SCRAMBLES))
 
