@@ -18,20 +18,24 @@ def save_model(model_to_save, model_name):
 def create_model():
     new_model = Sequential()
     new_model.add(InputLayer(324,))
-    new_model.add(Dense(228, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01)))
+    new_model.add(Dense(1024, activation='relu'))
     new_model.add(Dropout(0.3))
-    new_model.add(Dense(8, input_shape=(228,), activation='softmax'))
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
+    new_model.add(Dense(2048, activation='relu'))
+    new_model.add(Dropout(0.3))
+    new_model.add(Dense(1024, activation='relu'))
+    new_model.add(Dropout(0.3))
+    new_model.add(Dense(30, activation='softmax'))
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
     new_model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     new_model.summary()
     return new_model
 
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 5
+    NUM_SCRAMBLES = 7
     LOSS_GOAL = 0.2
-    ACCURACY_GOAL = 1
-    BATCH_SIZE = 1000
+    ACCURACY_GOAL = 0.98
+    BATCH_SIZE = 4096
     NUM_EPOCHS = 10
     EVALUATION_SIZE = 512
 
