@@ -8,6 +8,7 @@ import tensorflow as tf
 from datetime import timedelta
 from keras import Sequential
 from keras.layers import Dense, InputLayer, Dropout
+from keras import regularizers
 
 
 def save_model(model_to_save, model_name):
@@ -19,7 +20,8 @@ def create_model():
     new_model.add(InputLayer(324,))
     new_model.add(Dense(324, activation='relu'))
     new_model.add(Dropout(0.3))
-    new_model.add(Dense(26, activation='softmax'))
+    new_model.add(Dense(324, activation='relu'))
+    new_model.add(Dense(6, activation='softmax'))
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
     new_model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     new_model.summary()
@@ -27,9 +29,9 @@ def create_model():
 
 
 if __name__ == '__main__':
-    NUM_SCRAMBLES = 5
+    NUM_SCRAMBLES = 6
     LOSS_GOAL = 0.2
-    ACCURACY_GOAL = 0.995
+    ACCURACY_GOAL = 1.0
     BATCH_SIZE = 4096
     NUM_EPOCHS = 10
     EVALUATION_SIZE = 512
@@ -46,10 +48,10 @@ if __name__ == '__main__':
         session += 1
         print("********** Session {} **********".format(session))
         print("Fitting Model".format(session))
-        train_x, train_y = Data.create_categorical_training_data(BATCH_SIZE, NUM_SCRAMBLES)
+        train_x, train_y = Data.create_maximum_scramble_data(BATCH_SIZE, NUM_SCRAMBLES)
         model.fit(train_x, train_y, epochs=NUM_EPOCHS, verbose=0)
         print("Evaluating Model".format(session))
-        test_x, test_y = Data.create_categorical_training_data(EVALUATION_SIZE, NUM_SCRAMBLES)
+        test_x, test_y = Data.create_maximum_scramble_data(EVALUATION_SIZE, NUM_SCRAMBLES)
         test_loss, test_acc = model.evaluate(test_x, test_y)
         print("Session Time {}".format(timedelta(seconds=time.time() - session_time)))
         print("Running Time {}".format(timedelta(seconds=time.time() - start_time)))

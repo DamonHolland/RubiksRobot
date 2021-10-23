@@ -1,5 +1,6 @@
 import sys
 import os.path
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import ai.RubiksDataset as Data
 import ai.RubiksSolver as Solver
@@ -9,77 +10,94 @@ from visuals.RubiksVisualizer import RubiksVisualizer
 import tensorflow as tf
 import numpy as np
 import copy
+import time
+import itertools
+from queue import PriorityQueue
+
+# Evaluation Config
+NUM_SCRAMBLES = 5
+MAX_MOVES = 30
+# Load Model
+MODEL_NAME = "Training"
+model = tf.keras.models.load_model("models/" + MODEL_NAME)
+CUBE_SOLVED = 1000
+MAX_SEARCH = 200
 
 
-def get_categorical_prediction(prediction_model, cube) -> int:
+def get_categorical_prediction(cube) -> int:
     # Gets the numerical prediction from the neural network
     # This value is the estimated number of solves left
-    predictions = prediction_model(np.array([Data.encode_to_input(cube)]))[0]
+    predictions = model(np.array([Data.encode_to_input(cube)]))[0]
     return np.argmax(predictions, axis=0) + 1
 
 
-if __name__ == '__main__':
-    # Evaluation Config
-    NUM_SCRAMBLES = 5
-    MAX_MOVES = 30
-    # Load Model
-    MODEL_NAME = "5_0.99609375_0.01692289113998413"
-    model = tf.keras.models.load_model("models/" + MODEL_NAME)
+class Node:
+    depth: int
+    move_list: list
+    value = 0
 
+    def __init__(self, depth: int, move_list: list, initial_cube: RubiksCube):
+        # Depth of this node and the move list to get to this configuration
+        self.move_list = move_list
+        self.depth = depth
+        value_cube = RubiksCube()
+        value_cube.faces = copy.copy(initial_cube.faces)
+        for move in self.move_list:
+            Solver.perform_move(value_cube, move)
+        if value_cube.is_solved():
+            self.value = CUBE_SOLVED
+        else:
+            self.value = get_categorical_prediction(value_cube) - (self.depth * 1.2)
+
+
+if __name__ == '__main__':
     print("\nEvaluating Model\n")
     total_solves = 0
     success_solves = 0
-    rubiks_cube = RubiksCube()
     visual_cube = RubiksCube()
     RubiksVisualizer(visual_cube)
     # Evaluates until you exit the program
     while True:
+        counter = itertools.count()
         solve_visual_moves = []
         move_count = 0
         last_move_reverse = -1
         rubiks_cube = RubiksCube()
         rubiks_cube.scramble(NUM_SCRAMBLES)
         visual_cube.faces = copy.copy(rubiks_cube.faces)
-        # Attempts moves until the cube is solved or attempts run out
-        while not rubiks_cube.is_solved() and move_count < MAX_MOVES:
-            next_solve_minimum = 100
-            minimum_move = 0
-            # Loop through each possible move
-            for key in MoveDecoder.keys():
-                # Don't attempt the reverse of the previous move, will just end up in a loop
-                if key == last_move_reverse:
-                    continue
-                # Perform the move on the cube, then evaluate the new cube
-                Solver.perform_move(rubiks_cube, key)
-                # If the new cube is solved, pick it
-                if rubiks_cube.is_solved():
-                    next_solve_minimum = -1
-                    minimum_move = key
-                    # Undo the Scramble caused by the move before exiting
-                    Solver.perform_move(rubiks_cube, key + 1 if key % 2 == 0 else key - 1)
-                    break
-                # Get the evaluation from the model to determine if it is a desired result
-                prediction = get_categorical_prediction(model, rubiks_cube)
-                if prediction < next_solve_minimum:
-                    next_solve_minimum = prediction
-                    minimum_move = key
-                # Undo the Scramble caused by the move before continuing
-                Solver.perform_move(rubiks_cube, key + 1 if key % 2 == 0 else key - 1)
-            # After picking the best move, perform it on the cube, and save it for the visualizer later
+
+        pq = PriorityQueue()
+        # Add first node to priority queue
+        first_node = Node(0, [], rubiks_cube)
+        pq.put((first_node.value, next(counter), first_node))
+        # Pop off Nodes Until a solution is found
+        found_solution_node = None
+        visited_nodes = 0
+        while not found_solution_node and move_count < MAX_MOVES:
             move_count += 1
-            last_move_reverse = minimum_move + 1 if minimum_move % 2 == 0 else minimum_move - 1
-            solve_visual_moves.append(minimum_move)
-            Solver.perform_move(rubiks_cube, minimum_move)
-        # Show the moves with the visualizer and evaluate the result
-        print("\n\n\n")
+            # Pop highest priority node off of the queue
+            popped_node: Node = pq.get()[2]
+            for move in MoveDecoder.keys():
+                # Add all children of the highest priority node to the priority queue
+                new_node = Node(popped_node.depth + 1, popped_node.move_list + [move], rubiks_cube)
+                visited_nodes += 1
+                # If the new node is a solved node, exit
+                if new_node.value == CUBE_SOLVED:
+                    found_solution_node = new_node
+                    break
+                pq.put((new_node.value, next(counter), new_node))
+        print("Visited Nodes: {}".format(visited_nodes))
         total_solves += 1
-        for move in solve_visual_moves:
-            Solver.perform_move(visual_cube, move)
-            # time.sleep(0.3)
-        if rubiks_cube.is_solved():
+        # Evaluate the result
+        if found_solution_node:
+            solution = found_solution_node.move_list
             print("AI Solved cube in {} Moves".format(move_count))
             success_solves += 1
+            # Show the moves with the visualizer
+            for move in solution:
+                Solver.perform_move(visual_cube, move)
+                time.sleep(0.01)
         else:
             print("AI Failed to solve cube in {} Moves".format(MAX_MOVES))
-        print("AI Solved Cube {} out of {} times.".format(success_solves, total_solves))
-        # time.sleep(1)
+        print("AI Solved Cube {} out of {} times.\n".format(success_solves, total_solves))
+        time.sleep(0.01)

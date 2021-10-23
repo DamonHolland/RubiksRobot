@@ -1,3 +1,4 @@
+import copy
 import random
 
 SOLVED_CUBE = [(0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1),
@@ -33,7 +34,8 @@ class RubiksCube:
     def __init__(self):
         self.verbose = False
         self.faces = []
-        self.last_move = 0
+        self.last_move = -1
+        self.last_move2 = -1
         for face in self.CUBE_FACES:
             for i in range(self.PIECE_FACES_PER_SIDE):
                 self.faces.append(face)
@@ -68,13 +70,24 @@ class RubiksCube:
                           lambda cc: self.rotate_red(cc),
                           lambda cc: self.rotate_blue(cc), lambda cc: self.rotate_orange(cc),
                           lambda cc: self.rotate_yellow(cc)]
-        for i in range(move_count):
-            last_move_opposite = self.last_move + 1 if self.last_move % 2 == 0 else self.last_move - 1
-            next_move = random.randint(0, 11)
-            while next_move == last_move_opposite:
+        initial_state = copy.copy(self.faces)
+        unique = False
+        while not unique:
+            encountered_states = []
+            self.faces = copy.copy(initial_state)
+            for i in range(move_count):
+                last_move_opposite = self.last_move + 1 if self.last_move % 2 == 0 else self.last_move - 1
                 next_move = random.randint(0, 11)
-            self.last_move = next_move
-            possible_moves[int(self.last_move / 2)](self.last_move % 2)
+                while next_move == last_move_opposite or (next_move == self.last_move and next_move == self.last_move2):
+                    next_move = random.randint(0, 11)
+                self.last_move2 = self.last_move
+                self.last_move = next_move
+                possible_moves[int(self.last_move / 2)](self.last_move % 2)
+                encountered_states.append(copy.copy(self.faces))
+            unique = True
+            for state in encountered_states:
+                if encountered_states.count(state) > 1:
+                    unique = False
 
     def rotate_white(self, cc=False):
         if self.verbose:
