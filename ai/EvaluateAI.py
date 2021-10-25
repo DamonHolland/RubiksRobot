@@ -47,7 +47,7 @@ class Node:
         if value_cube.is_solved():
             self.value = CUBE_SOLVED
         else:
-            self.value = get_categorical_prediction(value_cube) - (self.depth * 1.2)
+            self.value = get_categorical_prediction(value_cube) + (self.depth * 1.2)
 
 
 if __name__ == '__main__':
@@ -96,8 +96,8 @@ if __name__ == '__main__':
             # Show the moves with the visualizer
             for move in solution:
                 Solver.perform_move(visual_cube, move)
-                time.sleep(0.01)
+                time.sleep(0.5)
         else:
             print("AI Failed to solve cube in {} Moves".format(MAX_MOVES))
         print("AI Solved Cube {} out of {} times.\n".format(success_solves, total_solves))
-        time.sleep(0.01)
+        time.sleep(0.5)
