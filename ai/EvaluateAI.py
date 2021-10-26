@@ -19,7 +19,7 @@ NUM_SCRAMBLES = 5
 MODEL_NAME = "5_Perfect"
 model = tf.keras.models.load_model("models/" + MODEL_NAME)
 SOLVED_VALUE = 1000
-MAX_NODES = 10000
+MAX_TIME = 10
 
 
 def get_categorical_prediction(cube) -> int:
@@ -56,6 +56,7 @@ if __name__ == '__main__':
     RubiksVisualizer(rubiks_cube)
     # Evaluates until you exit the program
     while True:
+        start_time = time.time()
         counter = itertools.count()
         last_move_reverse = -1
         rubiks_cube.reset()
@@ -69,23 +70,22 @@ if __name__ == '__main__':
         # Pop off Nodes Until a solution is found
         found_solution_node = None
         visited_nodes = 0
-        while not found_solution_node and visited_nodes < MAX_NODES:
+        while not found_solution_node and time.time() - start_time <= MAX_TIME:
             # Pop highest priority node off of the queue
             popped_node: Node = pq.get()[2]
             for move in MoveDecoder.keys():
                 # Add all children of the highest priority node to the priority queue
-                visited_nodes += 1
                 new_node = Node(popped_node.depth + 1, popped_node.move_list + [move], rubiks_cube)
                 # If the new node is a solved node, exit
                 if new_node.value == SOLVED_VALUE:
                     found_solution_node = new_node
                     break
                 pq.put((new_node.value, next(counter), new_node))
-        print("Visited Nodes: {}".format(visited_nodes))
         total_solves += 1
         # Evaluate the result
         if found_solution_node:
-            print("AI Solved cube in {} Moves".format(len(found_solution_node.move_list)))
+            print("AI solved cube in {} Moves".format(len(found_solution_node.move_list)))
+            print("Solve time: {} seconds".format(round(time.time() - start_time, 2)))
             success_solves += 1
             # Show the moves with the visualizer
             time.sleep(1.0)
@@ -94,5 +94,5 @@ if __name__ == '__main__':
                 time.sleep(0.5)
             time.sleep(1.0)
         else:
-            print("AI Failed to solve cube in within {} nodes".format(MAX_NODES))
+            print("AI Failed to solve cube in within {} seconds".format(MAX_TIME))
         print("AI Solved Cube {} out of {} times. ({}%)\n".format(success_solves, total_solves, (success_solves / total_solves) * 100))
