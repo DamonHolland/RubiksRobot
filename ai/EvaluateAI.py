@@ -16,12 +16,11 @@ from queue import PriorityQueue
 
 # Evaluation Config
 NUM_SCRAMBLES = 5
-MAX_MOVES = 30
 # Load Model
-MODEL_NAME = "Training"
+MODEL_NAME = "5_Perfect"
 model = tf.keras.models.load_model("models/" + MODEL_NAME)
 CUBE_SOLVED = 1000
-MAX_SEARCH = 200
+MAX_NODES = 3000
 
 
 def get_categorical_prediction(cube) -> int:
@@ -42,8 +41,8 @@ class Node:
         self.depth = depth
         value_cube = RubiksCube()
         value_cube.faces = copy.copy(initial_cube.faces)
-        for move in self.move_list:
-            Solver.perform_move(value_cube, move)
+        for attempt_move in self.move_list:
+            Solver.perform_move(value_cube, attempt_move)
         if value_cube.is_solved():
             self.value = CUBE_SOLVED
         else:
@@ -60,7 +59,6 @@ if __name__ == '__main__':
     while True:
         counter = itertools.count()
         solve_visual_moves = []
-        move_count = 0
         last_move_reverse = -1
         rubiks_cube = RubiksCube()
         rubiks_cube.scramble(NUM_SCRAMBLES)
@@ -73,8 +71,7 @@ if __name__ == '__main__':
         # Pop off Nodes Until a solution is found
         found_solution_node = None
         visited_nodes = 0
-        while not found_solution_node and move_count < MAX_MOVES:
-            move_count += 1
+        while not found_solution_node and visited_nodes < MAX_NODES:
             # Pop highest priority node off of the queue
             popped_node: Node = pq.get()[2]
             for move in MoveDecoder.keys():
@@ -91,13 +88,14 @@ if __name__ == '__main__':
         # Evaluate the result
         if found_solution_node:
             solution = found_solution_node.move_list
-            print("AI Solved cube in {} Moves".format(move_count))
+            print("AI Solved cube in {} Moves".format(len(solution)))
             success_solves += 1
             # Show the moves with the visualizer
             for move in solution:
                 Solver.perform_move(visual_cube, move)
-                time.sleep(0.5)
+                # time.sleep(0.5)
         else:
-            print("AI Failed to solve cube in {} Moves".format(MAX_MOVES))
+            print("AI Failed to solve cube in within {} nodes".format(MAX_NODES))
+
         print("AI Solved Cube {} out of {} times.\n".format(success_solves, total_solves))
-        time.sleep(0.5)
+        # time.sleep(0.5)
