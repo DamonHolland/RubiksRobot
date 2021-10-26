@@ -1,3 +1,5 @@
+from model.RubiksCube import RubiksCube
+
 MoveDecoder = {0: "U",
                1: "U'",
                2: "F",
@@ -24,3 +26,30 @@ MoveEncoder = {"U": 0,
                "L'": 9,
                "D": 10,
                "D'": 11}
+
+
+def perform_move(cube: RubiksCube, move):
+    if move == 0:
+        cube.rotate_white()
+    elif move == 1:
+        cube.rotate_white(True)
+    elif move == 2:
+        cube.rotate_green()
+    elif move == 3:
+        cube.rotate_green(True)
+    elif move == 4:
+        cube.rotate_red()
+    elif move == 5:
+        cube.rotate_red(True)
+    elif move == 6:
+        cube.rotate_blue()
+    elif move == 7:
+        cube.rotate_blue(True)
+    elif move == 8:
+        cube.rotate_orange()
+    elif move == 9:
+        cube.rotate_orange(True)
+    elif move == 10:
+        cube.rotate_yellow()
+    elif move == 11:
+        cube.rotate_yellow(True)

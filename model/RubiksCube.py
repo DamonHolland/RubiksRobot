@@ -36,30 +36,20 @@ class RubiksCube:
         self.faces = []
         self.last_move = -1
         self.last_move2 = -1
+        self.reset()
+
+    def reset(self):
+        self.verbose = False
+        self.faces = []
+        self.last_move = -1
+        self.last_move2 = -1
         for face in self.CUBE_FACES:
             for i in range(self.PIECE_FACES_PER_SIDE):
                 self.faces.append(face)
 
     def as_string(self):
         string = ""
-        for face in self.faces[0:9]:
-            string += self.HUMAN_READABLE[face]
-        for face in self.faces[18:27]:
-            string += self.HUMAN_READABLE[face]
-        for face in self.faces[9:18]:
-            string += self.HUMAN_READABLE[face]
-        string += self.HUMAN_READABLE[self.faces[47]]
-        string += self.HUMAN_READABLE[self.faces[50]]
-        string += self.HUMAN_READABLE[self.faces[53]]
-        string += self.HUMAN_READABLE[self.faces[46]]
-        string += self.HUMAN_READABLE[self.faces[49]]
-        string += self.HUMAN_READABLE[self.faces[52]]
-        string += self.HUMAN_READABLE[self.faces[45]]
-        string += self.HUMAN_READABLE[self.faces[48]]
-        string += self.HUMAN_READABLE[self.faces[51]]
-        for face in self.faces[36:45]:
-            string += self.HUMAN_READABLE[face]
-        for face in self.faces[27:36]:
+        for face in self.faces:
             string += self.HUMAN_READABLE[face]
         return string
 

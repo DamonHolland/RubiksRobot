@@ -3,8 +3,7 @@ import os.path
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import ai.RubiksDataset as Data
-import ai.RubiksSolver as Solver
-from ai.RubiksMoves import MoveDecoder
+from ai.RubiksMoves import MoveDecoder, perform_move
 from model.RubiksCube import RubiksCube
 from visuals.RubiksVisualizer import RubiksVisualizer
 import tensorflow as tf
@@ -19,8 +18,8 @@ NUM_SCRAMBLES = 5
 # Load Model
 MODEL_NAME = "5_Perfect"
 model = tf.keras.models.load_model("models/" + MODEL_NAME)
-CUBE_SOLVED = 1000
-MAX_NODES = 3000
+SOLVED_VALUE = 1000
+MAX_NODES = 1000
 
 
 def get_categorical_prediction(cube) -> int:
@@ -33,7 +32,7 @@ def get_categorical_prediction(cube) -> int:
 class Node:
     depth: int
     move_list: list
-    value = 0
+    value: int
 
     def __init__(self, depth: int, move_list: list, initial_cube: RubiksCube):
         # Depth of this node and the move list to get to this configuration
@@ -42,27 +41,26 @@ class Node:
         value_cube = RubiksCube()
         value_cube.faces = copy.copy(initial_cube.faces)
         for attempt_move in self.move_list:
-            Solver.perform_move(value_cube, attempt_move)
+            perform_move(value_cube, attempt_move)
         if value_cube.is_solved():
-            self.value = CUBE_SOLVED
+            self.value = SOLVED_VALUE
         else:
-            self.value = get_categorical_prediction(value_cube) + (self.depth * 1.2)
+            self.value = get_categorical_prediction(value_cube) + self.depth
 
 
 if __name__ == '__main__':
     print("\nEvaluating Model\n")
     total_solves = 0
     success_solves = 0
-    visual_cube = RubiksCube()
-    RubiksVisualizer(visual_cube)
+    rubiks_cube = RubiksCube()
+    RubiksVisualizer(rubiks_cube)
     # Evaluates until you exit the program
     while True:
         counter = itertools.count()
-        solve_visual_moves = []
         last_move_reverse = -1
-        rubiks_cube = RubiksCube()
+        rubiks_cube.reset()
         rubiks_cube.scramble(NUM_SCRAMBLES)
-        visual_cube.faces = copy.copy(rubiks_cube.faces)
+        print("Cube scrambled {} times".format(NUM_SCRAMBLES))
 
         pq = PriorityQueue()
         # Add first node to priority queue
@@ -73,13 +71,13 @@ if __name__ == '__main__':
         visited_nodes = 0
         while not found_solution_node and visited_nodes < MAX_NODES:
             # Pop highest priority node off of the queue
+            visited_nodes += 1
             popped_node: Node = pq.get()[2]
             for move in MoveDecoder.keys():
                 # Add all children of the highest priority node to the priority queue
                 new_node = Node(popped_node.depth + 1, popped_node.move_list + [move], rubiks_cube)
-                visited_nodes += 1
                 # If the new node is a solved node, exit
-                if new_node.value == CUBE_SOLVED:
+                if new_node.value == SOLVED_VALUE:
                     found_solution_node = new_node
                     break
                 pq.put((new_node.value, next(counter), new_node))
@@ -87,15 +85,14 @@ if __name__ == '__main__':
         total_solves += 1
         # Evaluate the result
         if found_solution_node:
-            solution = found_solution_node.move_list
-            print("AI Solved cube in {} Moves".format(len(solution)))
+            print("AI Solved cube in {} Moves".format(len(found_solution_node.move_list)))
             success_solves += 1
             # Show the moves with the visualizer
-            for move in solution:
-                Solver.perform_move(visual_cube, move)
-                # time.sleep(0.5)
+            time.sleep(1.0)
+            for move in found_solution_node.move_list:
+                perform_move(rubiks_cube, move)
+                time.sleep(0.5)
+            time.sleep(1.0)
         else:
             print("AI Failed to solve cube in within {} nodes".format(MAX_NODES))
-
-        print("AI Solved Cube {} out of {} times.\n".format(success_solves, total_solves))
-        # time.sleep(0.5)
+        print("AI Solved Cube {} out of {} times. ({}%)\n".format(success_solves, total_solves, (success_solves / total_solves) * 100))

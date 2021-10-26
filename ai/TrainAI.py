@@ -49,10 +49,10 @@ if __name__ == '__main__':
         session += 1
         print("********** Session {} **********".format(session))
         print("Fitting Model".format(session))
-        train_x, train_y = Data.create_maximum_scramble_data(BATCH_SIZE, NUM_SCRAMBLES)
+        train_x, train_y = Data.create_scramble_data(BATCH_SIZE, NUM_SCRAMBLES)
         model.fit(train_x, train_y, epochs=NUM_EPOCHS, verbose=0)
         print("Evaluating Model".format(session))
-        test_x, test_y = Data.create_maximum_scramble_data(EVALUATION_SIZE, NUM_SCRAMBLES)
+        test_x, test_y = Data.create_scramble_data(EVALUATION_SIZE, NUM_SCRAMBLES)
         test_loss, test_acc = model.evaluate(test_x, test_y)
         print("Session Time {}".format(timedelta(seconds=time.time() - session_time)))
         print("Running Time {}".format(timedelta(seconds=time.time() - start_time)))
