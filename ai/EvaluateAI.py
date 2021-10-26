@@ -19,7 +19,7 @@ NUM_SCRAMBLES = 5
 MODEL_NAME = "5_Perfect"
 model = tf.keras.models.load_model("models/" + MODEL_NAME)
 SOLVED_VALUE = 1000
-MAX_NODES = 1000
+MAX_NODES = 10000
 
 
 def get_categorical_prediction(cube) -> int:
@@ -71,10 +71,10 @@ if __name__ == '__main__':
         visited_nodes = 0
         while not found_solution_node and visited_nodes < MAX_NODES:
             # Pop highest priority node off of the queue
-            visited_nodes += 1
             popped_node: Node = pq.get()[2]
             for move in MoveDecoder.keys():
                 # Add all children of the highest priority node to the priority queue
+                visited_nodes += 1
                 new_node = Node(popped_node.depth + 1, popped_node.move_list + [move], rubiks_cube)
                 # If the new node is a solved node, exit
                 if new_node.value == SOLVED_VALUE:
