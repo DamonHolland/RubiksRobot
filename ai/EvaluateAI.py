@@ -30,14 +30,12 @@ def get_categorical_prediction(cube) -> int:
 
 
 class Node:
-    depth: int
     move_list: list
     value: int
 
-    def __init__(self, depth: int, move_list: list, initial_cube: RubiksCube):
+    def __init__(self, move_list: list, initial_cube: RubiksCube):
         # Depth of this node and the move list to get to this configuration
         self.move_list = move_list
-        self.depth = depth
         value_cube = RubiksCube()
         value_cube.faces = copy.copy(initial_cube.faces)
         for attempt_move in self.move_list:
@@ -45,7 +43,7 @@ class Node:
         if value_cube.is_solved():
             self.value = SOLVED_VALUE
         else:
-            self.value = get_categorical_prediction(value_cube) + self.depth
+            self.value = get_categorical_prediction(value_cube) + len(self.move_list)
 
 
 if __name__ == '__main__':
@@ -65,7 +63,7 @@ if __name__ == '__main__':
 
         pq = PriorityQueue()
         # Add first node to priority queue
-        first_node = Node(0, [], rubiks_cube)
+        first_node = Node([], rubiks_cube)
         pq.put((first_node.value, next(counter), first_node))
         # Pop off Nodes Until a solution is found
         found_solution_node = None
@@ -75,7 +73,7 @@ if __name__ == '__main__':
             popped_node: Node = pq.get()[2]
             for move in MoveDecoder.keys():
                 # Add all children of the highest priority node to the priority queue
-                new_node = Node(popped_node.depth + 1, popped_node.move_list + [move], rubiks_cube)
+                new_node = Node(popped_node.move_list + [move], rubiks_cube)
                 # If the new node is a solved node, exit
                 if new_node.value == SOLVED_VALUE:
                     found_solution_node = new_node
@@ -84,15 +82,18 @@ if __name__ == '__main__':
         total_solves += 1
         # Evaluate the result
         if found_solution_node:
+            elapsed_time = round(time.time() - start_time, 2)
             print("AI solved cube in {} Moves".format(len(found_solution_node.move_list)))
-            print("Solve time: {} seconds".format(round(time.time() - start_time, 2)))
+            print("Solve time: {} seconds".format(elapsed_time))
             success_solves += 1
             # Show the moves with the visualizer
-            time.sleep(1.0)
+            time.sleep(1.0 - elapsed_time if 1.0 - elapsed_time >= 0 else 0)
             for move in found_solution_node.move_list:
                 perform_move(rubiks_cube, move)
                 time.sleep(0.5)
             time.sleep(1.0)
         else:
-            print("AI Failed to solve cube in within {} seconds".format(MAX_TIME))
+            print("AI Failed to solve cube within {} seconds".format(MAX_TIME))
         print("AI Solved Cube {} out of {} times. ({}%)\n".format(success_solves, total_solves, (success_solves / total_solves) * 100))
+
+        # Add dead node checker
