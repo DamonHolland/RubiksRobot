@@ -134,7 +134,6 @@ if __name__ == '__main__':
     rubiks_cube = RubiksCube()
     rubiks_cube.enable_logging()
     RubiksVisualizer(rubiks_cube)
-    time.sleep(5)
     for i in range(30):
         time.sleep(0.5)
         rubiks_cube.scramble(1)

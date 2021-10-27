@@ -14,9 +14,9 @@ import itertools
 from queue import PriorityQueue
 
 # Evaluation Config
-NUM_SCRAMBLES = 5
+NUM_SCRAMBLES = 7
 # Load Model
-MODEL_NAME = "5_Perfect"
+MODEL_NAME = "5_1.0_0.006015448831021786"
 model = tf.keras.models.load_model("models/" + MODEL_NAME)
 SOLVED_VALUE = 1000
 MAX_TIME = 10
@@ -87,13 +87,11 @@ if __name__ == '__main__':
             print("Solve time: {} seconds".format(elapsed_time))
             success_solves += 1
             # Show the moves with the visualizer
-            # time.sleep(1.0 - elapsed_time if 1.0 - elapsed_time >= 0 else 0)
+            time.sleep(1.0 - elapsed_time if 1.0 - elapsed_time >= 0 else 0)
             for move in found_solution_node.move_list:
                 perform_move(rubiks_cube, move)
-                # time.sleep(0.5)
-            # time.sleep(1.0)
+                time.sleep(0.5)
+            time.sleep(1.0)
         else:
             print("AI Failed to solve cube within {} seconds".format(MAX_TIME))
         print("AI Solved Cube {} out of {} times. ({}%)\n".format(success_solves, total_solves, (success_solves / total_solves) * 100))
-
-        # Add dead node checker

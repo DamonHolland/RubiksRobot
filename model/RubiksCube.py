@@ -1,6 +1,5 @@
 import copy
 import random
-import sys
 
 SOLVED_CUBE = [(0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1),
                (0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 0, 1), (0, 0, 0, 0, 1, 0),
@@ -135,7 +134,7 @@ class RubiksCube:
     def _rotate_swap(self, index_1, index_2, index_3, index_4, cc=False):
         self.faces[index_1], self.faces[index_2], self.faces[index_3], self.faces[index_4] = \
             (self.faces[index_2], self.faces[index_3], self.faces[index_4], self.faces[index_1]) if cc \
-                else (self.faces[index_4], self.faces[index_1], self.faces[index_2], self.faces[index_3])
+            else (self.faces[index_4], self.faces[index_1], self.faces[index_2], self.faces[index_3])
 
     def enable_logging(self):
         self.verbose = True
