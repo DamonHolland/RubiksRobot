@@ -1,7 +1,6 @@
 import random
 import sys
 import os.path
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import time
 from datetime import timedelta
@@ -31,16 +30,16 @@ class DataSet:
                 new_cube.scramble(scramble_choice)
             try:
                 # If the cube state already exists, end this solve
-                check_value = self.training_data[tuple(encode_to_input(new_cube))]
+                check_value = self.training_data[new_cube.as_string()]
                 if scramble_choice - 1 < check_value:
-                    self.training_data[tuple(encode_to_input(new_cube))] = scramble_choice - 1
+                    self.training_data[new_cube.as_string()] = scramble_choice - 1
                     data_batch[tuple(encode_to_input(new_cube))] = scramble_choice - 1
                 else:
                     data_batch[tuple(encode_to_input(new_cube))] = check_value
                 fail_count += 1
             except KeyError:
                 # If the cube state does not already exist in the input data, continue
-                self.training_data[tuple(encode_to_input(new_cube))] = scramble_choice - 1
+                self.training_data[new_cube.as_string()] = scramble_choice - 1
                 data_batch[tuple(encode_to_input(new_cube))] = scramble_choice - 1
                 fail_count = 0
             # To break if there arent as many permutations as there is requested data
