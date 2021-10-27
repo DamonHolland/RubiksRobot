@@ -57,27 +57,25 @@ class RubiksCube:
         if self.verbose:
             print("Scrambling Cube {} turns".format(str(move_count)))
         possible_moves = [lambda cc: self.rotate_white(cc), lambda cc: self.rotate_green(cc),
-                          lambda cc: self.rotate_red(cc),
-                          lambda cc: self.rotate_blue(cc), lambda cc: self.rotate_orange(cc),
-                          lambda cc: self.rotate_yellow(cc)]
-        initial_state = copy.copy(self.faces)
-        unique = False
-        while not unique:
-            encountered_states = []
-            self.faces = copy.copy(initial_state)
-            for i in range(move_count):
-                last_move_opposite = self.last_move + 1 if self.last_move % 2 == 0 else self.last_move - 1
+                          lambda cc: self.rotate_red(cc), lambda cc: self.rotate_blue(cc),
+                          lambda cc: self.rotate_orange(cc), lambda cc: self.rotate_yellow(cc)]
+        encountered_states = []
+        next_move = 0
+        for i in range(move_count):
+            # record current state, and save it as an encountered state
+            previous_state = next_state = copy.copy(self.faces)
+            encountered_states.append(previous_state)
+            while encountered_states.count(next_state) > 0:
+                # Revert cube to previous state
+                self.faces = copy.copy(previous_state)
+                # Apply a random move, don't allow same move 3 in a row
                 next_move = random.randint(0, 11)
-                while next_move == last_move_opposite or (next_move == self.last_move and next_move == self.last_move2):
+                while next_move == self.last_move and next_move == self.last_move2:
                     next_move = random.randint(0, 11)
-                self.last_move2 = self.last_move
-                self.last_move = next_move
-                possible_moves[int(self.last_move / 2)](self.last_move % 2)
-                encountered_states.append(copy.copy(self.faces))
-            unique = True
-            for state in encountered_states:
-                if encountered_states.count(state) > 1:
-                    unique = False
+                possible_moves[int(next_move / 2)](next_move % 2)
+                next_state = copy.copy(self.faces)
+            self.last_move2 = self.last_move
+            self.last_move = next_move
 
     def rotate_white(self, cc=False):
         if self.verbose:
