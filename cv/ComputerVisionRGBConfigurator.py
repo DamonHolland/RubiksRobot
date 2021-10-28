@@ -8,6 +8,8 @@ def mouseRGB(event,x,y,flags,param):
         colorsG = frame[y,x,1]
         colorsR = frame[y,x,2]
         colors = frame[y,x]
+        print(type(frame[y,x]))
+        print(type(y))
         print("Red: ",colorsR)
         print("Green: ",colorsG)
         print("Blue: ",colorsB)

@@ -1,6 +1,9 @@
 import cv2 as cv
 import numpy as np
 
+# CONFIG
+NUM_POINTS = 4
+
 frameWidth = 720
 frameHeight = 720
 cap = cv.VideoCapture(0)
@@ -14,6 +17,7 @@ if not cap.isOpened():
 
 def empty(a):
     pass
+
 
 def stackFrames(scale, frameArray):
     rows = len(frameArray)
@@ -81,6 +85,53 @@ def getContours(frame, frameContour):
             return approx
 
 
+def drawPoints(pointsArry: list, frameChange):
+    for x in range(len(pointsArry)):
+        if x == len(pointsArry) - 1:
+            start = (pointsArry[x][0][0], pointsArry[x][0][1])
+            end = (pointsArry[0][0][0], pointsArry[0][0][1])
+        else:
+            start = (pointsArry[x][0][0], pointsArry[x][0][1])
+            end = (pointsArry[x + 1][0][0], pointsArry[x + 1][0][1])
+
+        frameChange = cv.line(frameChange, start, end, (0, 0, 255), 9)
+
+    return frameChange
+
+
+def angle_cos(p0, p1, p2):
+    d1, d2 = (p0-p1).astype('float'), (p2-p1).astype('float')
+    return abs(np.dot(d1, d2) / np.sqrt(np.dot(d1, d1)*np.dot(d2, d2)))
+
+
+def find_squares(frame):
+    frame = cv.GaussianBlur(frame, (5, 5), 0)
+    squares = []
+    countS = 0
+    for gray in cv.split(frame):
+        bin = cv.Canny(gray, 500, 700, apertureSize=5)
+        bin = cv.dilate(bin, None)
+        for threshold in range(0, 255, 26):
+            if threshold != 0:
+                ret, bin = cv.threshold(gray, threshold, 255, cv.THRESH_BINARY)
+            contours, _hierarchy = cv.findContours(
+                bin, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+            for cnt in contours:
+                cnt_len = cv.arcLength(cnt, True)
+                cnt = cv.approxPolyDP(cnt, 0.02*cnt_len, True)
+                if len(cnt) == 4 and 60000 > cv.contourArea(cnt) > 1000 and cv.isContourConvex(cnt):
+                    cnt = cnt.reshape(-1, 2)
+                    max_cos = np.max(
+                        [angle_cos(cnt[i], cnt[(i+1) % 4], cnt[(i+2) % 4]) for i in range(4)])
+                    if max_cos < 0.2 and countS < 1:
+                        uniqueSquare = True
+
+                        if uniqueSquare:
+                            squares.append(cnt)
+                            countS = countS + 1
+    return squares
+
+
 while True:
     ret, frame = cap.read()
 
@@ -95,22 +146,44 @@ while True:
 
     points = getContours(frameDil, frameContour)
 
-    if points is not None:
-        if len(points) == 6:
-            for x in range(len(points)):
-                if x == 5:
-                    start = (points[x][0][0], points[x][0][1])
-                    end = (points[0][0][0], points[0][0][1])
-                else:
-                    start = (points[x][0][0], points[x][0][1])
-                    end = (points[x + 1][0][0], points[x + 1][0][1])
-                if x + 1 == str(len(points)):
-                    start = (points[x][0][0], points[x][0][1])
+    frameMask = frame.copy()
+    frameSquares = frame.copy()
+    frameMaskImg = frame.copy()
 
-                frame = cv.line(frame, start, end, (0, 0, 255), 9)
+    if points is not None:
+        if len(points) == NUM_POINTS:
+            # frameMask = drawPoints(points, frameMask)
+            frameMask = np.zeros(frame.shape, dtype=np.uint8)
+            frameMask = cv.rectangle(frameMask, [points[0][0][0], points[0][0][1]], [points[2][0][0], points[2][0][1]], (255, 255, 255), -1)
+
+            # Mask input image with binary mask
+            frameMaskImg = cv.bitwise_and(frame, frameMask)
+            # Color background white
+            frameMaskImg[frameMask == 0] = 255
+
+            squares = find_squares(frameMaskImg)
+            frameSquares = cv.drawContours(frameSquares, squares, -1, (0, 255, 0), 3)
+
+            for square in squares:
+                x = square[0][0].item() + 20
+                y = square[0][1].item() + 20
+                colors = frame[x, y]
+                print(colors)
+                cv.putText(frameSquares, "BGR: " + str(colors), (square[0][0], square[0][1]), cv.FONT_HERSHEY_COMPLEX,
+                            .7,
+                            (0, 255, 0), 2)
+            # colorsB = frame[y, x, 0]
+            # colorsG = frame[y, x, 1]
+            # colorsR = frame[y, x, 2]
+            # colors = frame[y, x]
+            # print("Red: ", colorsR)
+            # print("Green: ", colorsG)
+            # print("Blue: ", colorsB)
+            # print("BRG Format: ", colors)
 
     frameStack = stackFrames(0.8, ([frame, frameCanny, frameGray],
-                                   [frameDil, frameBlur, frameContour]))
+                                   [frameDil, frameBlur, frameContour],
+                                   [frameMask, frameMaskImg, frameSquares]))
 
     cv.imshow('Rubiks Cube Viewer', frameStack)
 
