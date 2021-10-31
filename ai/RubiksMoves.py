@@ -53,3 +53,7 @@ def perform_move(cube: RubiksCube, move):
         cube.rotate_yellow()
     elif move == 11:
         cube.rotate_yellow(True)
+
+
+def move_reverse(move):
+    return move + 1 if move % 2 == 0 else move - 1
