@@ -1,63 +1,71 @@
 import random
 import sys
 import os.path
+
+from ai.AISolver import AISolver
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-import time
-from datetime import timedelta
 from model.RubiksCube import RubiksCube
+from RubiksMoves import encode_to_input
 import numpy as np
+import sqlite3
 
 
-def encode_to_input(cube) -> list:
-    encoding = []
-    for face_color in cube.faces:
-        encoding += face_color
-    return list(encoding)
+class RubiksDatabase:
+    def __init__(self, db_name):
+        self.conn = sqlite3.connect('./SQLite/{}'.format(db_name))
+        self.cursor = self.conn.cursor()
+        self.cursor.execute(
+            "CREATE TABLE IF NOT EXISTS RubiksData(encoding CHAR(324), scramble INTEGER, PRIMARY KEY (encoding))")
+        self.conn.commit()
 
+    def insert(self, encoding, scramble):
+        encoding_string = ""
+        for elem in encoding:
+            encoding_string += str(elem)
+        try:
+            self.cursor.execute("INSERT INTO RubiksData VALUES ('{}', '{}')".format(encoding_string, scramble))
+            print("Added new data for scramble {}".format(scramble))
+        except sqlite3.IntegrityError:
+            self.cursor.execute("SELECT scramble FROM RubiksData WHERE encoding = '{}'".format(encoding_string))
+            existing_scramble = self.cursor.fetchall()[0][0]
+            if existing_scramble > scramble:
+                print("Replaced existing scramble {} with {}".format(existing_scramble, scramble))
+                self.cursor.execute("REPLACE INTO RubiksData VALUES ('{}', '{}')".format(encoding_string, scramble))
+        self.conn.commit()
 
-class DataSet:
-    def __init__(self):
-        self.training_data = dict()
+    def get_data(self, scramble_max, num_samples):
+        results = []
+        for i in range(scramble_max):
+            self.cursor.execute("SELECT * FROM RubiksData WHERE scramble = {} ORDER BY RANDOM() LIMIT {}"
+                                .format(i + 1, int(num_samples / scramble_max)))
+            results += self.cursor.fetchall()
+        data_input = []
+        data_output = []
+        for i in range(len(results)):
+            rebuilt = []
+            for char in results[i][0]:
+                rebuilt.append(int(char))
+            data_input.append(np.array(rebuilt))
+            data_output.append(int(results[i][1]) - 1)
+        shuffle = np.random.permutation(len(data_input))
+        return np.array(data_input)[shuffle], np.array(data_output)[shuffle]
 
-    def create_scramble_data(self, data_size, scramble_moves):
-        fail_count = 0
-        data_batch = dict()
-        while len(data_batch.items()) < data_size:
-            # Scramble the cube
-            new_cube = RubiksCube()
-            scramble_choice = random.randint(1, scramble_moves)
-            while new_cube.is_solved():
-                new_cube.scramble(scramble_choice)
-            try:
-                # If the cube state already exists, end this solve
-                check_value = self.training_data[new_cube.as_string()]
-                if scramble_choice - 1 < check_value:
-                    self.training_data[new_cube.as_string()] = scramble_choice - 1
-                    data_batch[tuple(encode_to_input(new_cube))] = scramble_choice - 1
-                else:
-                    data_batch[tuple(encode_to_input(new_cube))] = check_value
-                fail_count += 1
-            except KeyError:
-                # If the cube state does not already exist in the input data, continue
-                self.training_data[new_cube.as_string()] = scramble_choice - 1
-                data_batch[tuple(encode_to_input(new_cube))] = scramble_choice - 1
-                fail_count = 0
-            # To break if there arent as many permutations as there is requested data
-            # Will fail if fails to find new data many times in a row
-            if fail_count > data_size:
-                print("Requested Data too large, not enough permutations. Only {} Found".format(len(data_batch)))
-                print("Requesting more data than permutations can lead to slower data generation.")
-                break
-        nn_input = np.array([list(key) for key in list(data_batch.keys())])
-        nn_output = np.array(list(data_batch.values()))
-        shuffle = np.random.permutation(len(data_batch))
-        return np.array(nn_input)[shuffle], np.array(nn_output)[shuffle]
+    def size(self):
+        self.cursor.execute("SELECT Count(scramble) FROM RubiksData")
+        return self.cursor.fetchall()[0][0]
 
 
 if __name__ == '__main__':
-    start_time = time.time()
-    SCRAMBLE_TEST = 6
-    Data = DataSet()
-    for i in range(1000):
-        x, y = Data.create_scramble_data(4096, SCRAMBLE_TEST)
-    print("Data created in {}".format(timedelta(seconds=time.time() - start_time)))
+    cube = RubiksCube()
+    SCRAMBLE_AMOUNT = 9
+    MAX_SOLVE_TIME = 10
+    ai_solver = AISolver("8_Training")
+    database = RubiksDatabase('RubiksData.db')
+    print(database.size())
+    while True:
+        scramble_amount = random.randint(1, SCRAMBLE_AMOUNT)
+        cube.reset()
+        cube.scramble(scramble_amount)
+        solve = ai_solver.solve(cube, MAX_SOLVE_TIME)
+        database.insert(encode_to_input(cube), len(solve) if solve else scramble_amount)

@@ -2,8 +2,7 @@ import sys
 import os.path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from visuals.RubiksVisualizer import RubiksVisualizer
-import ai.RubiksDataset as Data
-from ai.RubiksMoves import MoveDecoder, perform_move, move_reverse
+from ai.RubiksMoves import MoveDecoder, perform_move, move_reverse, encode_to_input
 from model.RubiksCube import RubiksCube
 import tensorflow as tf
 import numpy as np
@@ -51,14 +50,14 @@ class AISolver:
         return found_solution_node.move_list if found_solution_node else None
 
     def get_categorical_prediction(self, cube) -> int:
-        predictions = self.model(np.array([Data.encode_to_input(cube)]))[0]
+        predictions = self.model(np.array([encode_to_input(cube)]))[0]
         return np.argmax(predictions, axis=0) + 1
 
 
 if __name__ == '__main__':
-    SCRAMBLE_AMOUNT = 8
+    SCRAMBLE_AMOUNT = 9
     TIME_LIMIT = 10
-    ai_solver = AISolver("8_Training")
+    ai_solver = AISolver("Training")
     rubiks_cube = RubiksCube()
     visualizer = RubiksVisualizer(rubiks_cube)
     total = 0
@@ -66,19 +65,18 @@ if __name__ == '__main__':
     while True:
         time.sleep(1.0)
         rubiks_cube.reset()
-        start_time = time.time()
+        start_t = time.time()
         print("Scrambled cube {} moves.".format(SCRAMBLE_AMOUNT))
         rubiks_cube.scramble(SCRAMBLE_AMOUNT)
         solve_moves = ai_solver.solve(rubiks_cube, TIME_LIMIT)
         if solve_moves:
             success += 1
             print("AI solved cube in {} moves.".format(len(solve_moves)))
-            print("AI solved cube in {} seconds.".format(round(time.time() - start_time, 2)))
-            for move in solve_moves:
+            print("AI solved cube in {} seconds.".format(round(time.time() - start_t, 2)))
+            for solve_move in solve_moves:
                 time.sleep(0.5)
-                perform_move(rubiks_cube, move)
+                perform_move(rubiks_cube, solve_move)
         else:
             print("AI failed to solve cube in {} seconds".format(TIME_LIMIT))
         total += 1
         print("Cube solved {} out of {} times ({}%).\n\n".format(success, total, 100 * success / total))
-

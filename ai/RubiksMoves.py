@@ -57,3 +57,10 @@ def perform_move(cube: RubiksCube, move):
 
 def move_reverse(move):
     return move + 1 if move % 2 == 0 else move - 1
+
+
+def encode_to_input(cube) -> list:
+    encoding = []
+    for face_color in cube.faces:
+        encoding += face_color
+    return list(encoding)
