@@ -57,7 +57,7 @@ class AISolver:
 if __name__ == '__main__':
     SCRAMBLE_AMOUNT = 9
     TIME_LIMIT = 10
-    ai_solver = AISolver("Training")
+    ai_solver = AISolver("8_Training")
     rubiks_cube = RubiksCube()
     visualizer = RubiksVisualizer(rubiks_cube)
     total = 0
