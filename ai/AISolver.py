@@ -51,19 +51,22 @@ class AISolver:
 
     def get_categorical_prediction(self, cube) -> int:
         predictions = self.model(np.array([encode_to_input(cube)]))[0]
-        return np.argmax(predictions, axis=0) + 1
+        weighted_sum = 0
+        for i in range(len(predictions)):
+            weighted_sum += (1 + i) * float(predictions[i])
+        return weighted_sum
 
 
 if __name__ == '__main__':
     SCRAMBLE_AMOUNT = 9
     TIME_LIMIT = 10
-    ai_solver = AISolver("Training")
+    ai_solver = AISolver("8_Training")
     rubiks_cube = RubiksCube()
     visualizer = RubiksVisualizer(rubiks_cube)
     total = 0
     success = 0
     while True:
-        time.sleep(1.0)
+        # time.sleep(1.0)
         rubiks_cube.reset()
         start_t = time.time()
         print("Scrambled cube {} moves.".format(SCRAMBLE_AMOUNT))
@@ -74,7 +77,7 @@ if __name__ == '__main__':
             print("AI solved cube in {} moves.".format(len(solve_moves)))
             print("AI solved cube in {} seconds.".format(round(time.time() - start_t, 2)))
             for solve_move in solve_moves:
-                time.sleep(0.5)
+                # time.sleep(0.5)
                 perform_move(rubiks_cube, solve_move)
         else:
             print("AI failed to solve cube in {} seconds".format(TIME_LIMIT))
