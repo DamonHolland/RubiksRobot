@@ -1,5 +1,6 @@
 import sys
 import os.path
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from visuals.RubiksVisualizer import RubiksVisualizer
 from ai.RubiksMoves import MoveDecoder, perform_move, move_reverse, encode_to_input
@@ -13,16 +14,16 @@ from queue import PriorityQueue
 
 
 class Node:
-    move_list: list
+    moves: list
     value: float
 
-    def __init__(self, move_list: list, initial_cube: RubiksCube, predictor):
-        self.move_list = move_list
+    def __init__(self, moves: list, initial_cube: RubiksCube, predictor):
+        self.moves = moves
         value_cube = RubiksCube()
         value_cube.faces = copy.copy(initial_cube.faces)
-        for attempt_move in self.move_list:
+        for attempt_move in self.moves:
             perform_move(value_cube, attempt_move)
-        self.value = -sys.maxsize if value_cube.is_solved() else predictor(value_cube) + len(self.move_list) * 1.1
+        self.value = -sys.maxsize if value_cube.is_solved() else predictor(value_cube) + len(self.moves) * 1.1
 
 
 class AISolver:
@@ -34,25 +35,20 @@ class AISolver:
         pq = PriorityQueue()
         first_node = Node([], cube, self.get_categorical_prediction)
         pq.put((first_node.value, next(self.counter), first_node))
-        found_solution_node = None
         start_time = time.time()
-        while not found_solution_node and time.time() - start_time <= time_limit:
-            popped_node: Node = pq.get()[2]
-            last_move = popped_node.move_list[len(popped_node.move_list) - 1] if len(popped_node.move_list) != 0 else None
-            child_nodes = PriorityQueue()
+        solution_node = None
+        while time.time() - start_time <= time_limit and not solution_node:
+            p_node: Node = pq.get()[2]
             for move in MoveDecoder.keys():
+                last_move = p_node.moves[len(p_node.moves) - 1] if len(p_node.moves) != 0 else None
                 if last_move and move == move_reverse(last_move):
                     continue
-                new_node = Node(popped_node.move_list + [move], cube, self.get_categorical_prediction)
+                new_node = Node(p_node.moves + [move], cube, self.get_categorical_prediction)
                 if new_node.value == -sys.maxsize:
-                    found_solution_node = new_node
-                    break
-                child_nodes.put((new_node.value, next(self.counter), new_node))
-            if not found_solution_node:
-                for i in range(6):
-                    best_child: Node = child_nodes.get()[2]
-                    pq.put((best_child.value, next(self.counter), best_child))
-        return found_solution_node.move_list if found_solution_node else None
+                    solution_node = new_node
+                else:
+                    pq.put((new_node.value, next(self.counter), new_node))
+        return solution_node.moves if solution_node else None
 
     def get_categorical_prediction(self, cube) -> int:
         predictions = self.model(np.array([encode_to_input(cube)]))[0]
@@ -63,9 +59,9 @@ class AISolver:
 
 
 if __name__ == '__main__':
-    SCRAMBLE_AMOUNT = 6
+    SCRAMBLE_AMOUNT = 8
     TIME_LIMIT = 10
-    ai_solver = AISolver("9_Training")
+    ai_solver = AISolver("8_Training")
     rubiks_cube = RubiksCube()
     visualizer = RubiksVisualizer(rubiks_cube)
     total = 0
