@@ -22,7 +22,7 @@ class Node:
         value_cube.faces = copy.copy(initial_cube.faces)
         for attempt_move in self.move_list:
             perform_move(value_cube, attempt_move)
-        self.value = sys.maxsize if value_cube.is_solved() else predictor(value_cube) + len(self.move_list) * 1.1
+        self.value = -sys.maxsize if value_cube.is_solved() else predictor(value_cube) + len(self.move_list) * 1.1
 
 
 class AISolver:
@@ -38,15 +38,20 @@ class AISolver:
         start_time = time.time()
         while not found_solution_node and time.time() - start_time <= time_limit:
             popped_node: Node = pq.get()[2]
+            last_move = popped_node.move_list[len(popped_node.move_list) - 1] if len(popped_node.move_list) != 0 else None
+            child_nodes = PriorityQueue()
             for move in MoveDecoder.keys():
-                if len(popped_node.move_list) != 0:
-                    if move == move_reverse(popped_node.move_list[len(popped_node.move_list) - 1]):
-                        continue
+                if last_move and move == move_reverse(last_move):
+                    continue
                 new_node = Node(popped_node.move_list + [move], cube, self.get_categorical_prediction)
-                if new_node.value == sys.maxsize:
+                if new_node.value == -sys.maxsize:
                     found_solution_node = new_node
                     break
-                pq.put((new_node.value, next(self.counter), new_node))
+                child_nodes.put((new_node.value, next(self.counter), new_node))
+            if not found_solution_node:
+                for i in range(6):
+                    best_child: Node = child_nodes.get()[2]
+                    pq.put((best_child.value, next(self.counter), best_child))
         return found_solution_node.move_list if found_solution_node else None
 
     def get_categorical_prediction(self, cube) -> int:
@@ -58,9 +63,9 @@ class AISolver:
 
 
 if __name__ == '__main__':
-    SCRAMBLE_AMOUNT = 9
+    SCRAMBLE_AMOUNT = 6
     TIME_LIMIT = 10
-    ai_solver = AISolver("8_Training")
+    ai_solver = AISolver("9_Training")
     rubiks_cube = RubiksCube()
     visualizer = RubiksVisualizer(rubiks_cube)
     total = 0
