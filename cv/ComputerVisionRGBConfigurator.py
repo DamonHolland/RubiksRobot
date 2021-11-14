@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import ComputerVisionRubiksRGB
 
 
 def mouseRGB(event,x,y,flags,param):
@@ -8,13 +9,14 @@ def mouseRGB(event,x,y,flags,param):
         colorsG = frame[y,x,1]
         colorsR = frame[y,x,2]
         colors = frame[y,x]
-        print(type(frame[y,x]))
-        print(type(y))
         print("Red: ",colorsR)
         print("Green: ",colorsG)
         print("Blue: ",colorsB)
         print("BRG Format: ",colors)
         print("Coordinates of pixel: X: ",x,"Y: ",y)
+        
+        print("PIXEL CENTER")
+        print(ComputerVisionRubiksRGB.RGBUint8.identifyBGR(frame, x, y))
 
 
 cv2.namedWindow('mouseRGB')

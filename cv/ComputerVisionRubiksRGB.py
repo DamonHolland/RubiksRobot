@@ -1,21 +1,38 @@
 import numpy as np
+import cv2 as cv
 
 
 class RGBUint8:
-    WHITE_MIN = np.array([160, 160, 160], np.uint8)
-    WHITE_MAX = np.array([255, 255, 255], np.uint8)
+    def identifyBGR(frame, x, y):
+        hsv_frame = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+        
+        pixel_center = hsv_frame[y, x]
+        hue_value = pixel_center[0]
 
-    BLUE_MIN = np.array([10, 10, 50], np.uint8)
-    BLUE_MAX = np.array([100, 100, 255], np.uint8)
+        color = "Undefined"
 
-    RED_MIN = np.array([50, 10, 10], np.uint8)
-    RED_MAX = np.array([255, 100, 100], np.uint8)
+        if hue_value < 5:
+            color = "RED"
+        elif hue_value < 22:
+            color = "ORANGE"
+        elif hue_value < 33:
+            color = "YELLOW"
+        elif hue_value < 78:
+            color = "GREEN"
+        elif hue_value < 131:
+            color = "BLUE"
+        elif hue_value < 170:
+            color = "VIOLET"
+        else:
+            color = "RED"
 
-    YELLOW_MIN = np.array([20, 60, 60], np.uint8)
-    YELLOW_MAX = np.array([60, 255, 255], np.uint8)
+        pixel_center_bgr = frame[y, x]
+        b, g, r = int(pixel_center_bgr[0]), int(pixel_center_bgr[1]), int(pixel_center_bgr[2])
 
-    GREEN_MIN = np.array([10, 50, 10], np.uint8)
-    GREEN_MAX = np.array([100, 255, 100], np.uint8)
+        if b > 150 and g > 150 and r > 150:
+            color = "WHITE"
 
-    ORANGE_MIN = np.array([15, 30, 50], np.uint8)
-    ORANGE_MAX = np.array([255, 165, 255], np.uint8)
+        if b < 30 and g < 30 and r < 30:
+            color = "BLACK"
+
+        return color

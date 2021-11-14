@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import ComputerVisionRubiksRGB
 
 # CONFIG
 NUM_POINTS = 4
@@ -167,9 +168,9 @@ while True:
             for square in squares:
                 x = square[0][0].item() + 20
                 y = square[0][1].item() + 20
-                colors = frame[x, y]
-                print(colors)
-                cv.putText(frameSquares, "BGR: " + str(colors), (square[0][0], square[0][1]), cv.FONT_HERSHEY_COMPLEX,
+                colors = ComputerVisionRubiksRGB.RGBUint8.identifyBGR(frame, x, y)
+                cv.circle(frameSquares, (x, y), 2, (0, 0, 0), 2)
+                cv.putText(frameSquares, "Color: " + str(colors), (square[0][0], square[0][1]), cv.FONT_HERSHEY_COMPLEX,
                             .7,
                             (0, 255, 0), 2)
             # colorsB = frame[y, x, 0]
