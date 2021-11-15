@@ -87,12 +87,14 @@ void setUpMotor (motor* motorPtr, int dirPin, int stepPin, int maxNumSteps, int 
 }
 
 void rotateQuarter (motor* motor1) {
+  reOff(&motor1);
   for (int i = 0; i < (motor1->maxNumSteps / 4); i++) {
   digitalWrite(motor1->stepPin,HIGH); 
    delayMicroseconds(250); 
    digitalWrite(motor1->stepPin,LOW); 
    delayMicroseconds(250); 
   }
+  backOff(&motor1);
 }
 
 void rotateSteps (motor* motor1, int numSteps) {
@@ -112,12 +114,6 @@ void switchDirection (motor* motor1) {
     motor1->currentDirection = HIGH;
   }
   digitalWrite(motor1->dirPin, motor1->currentDirection); 
-  for (int i = 0; i < (motor1->give); i++) {
-  digitalWrite(motor1->stepPin,HIGH); 
-   delayMicroseconds(250); 
-   digitalWrite(motor1->stepPin,LOW); 
-   delayMicroseconds(250); 
-  }
 }
 
 void adjustMotorPosition (motor* motorPtr) {
@@ -150,9 +146,6 @@ void adjustMotorPosition (motor* motorPtr) {
         }
     }
   }
-  if (bHadToBeAdjusted) {
-    rotateSteps (motorPtr, STEP_BY * 3);
-  }
   if (motorPtr->currentDirection != originalDirection) {
     switchDirection(motorPtr);
   }
@@ -168,10 +161,28 @@ void calibrateMotors() {
     rotateQuarter(&motorArry[i]);
     adjustMotorPosition(&motorArry[i]);
     rotateQuarter(&motorArry[i]);
-    delay(5000);
+    delay(2500);
     switchDirection (&motorArry[i]);
     rotateQuarter(&motorArry[i]);
     rotateQuarter(&motorArry[i]);
-    delay(5000);
+    backOff(&motorArry[i])
+    delay(2500);
   }
+}
+
+void backOff(motor* motorPtr) {
+  if (motorPtr->currentDirection == HIGH) {
+    digitalWrite(motorPtr->dirPin, LOW);
+    rotateSteps (motorPtr, motorPtr->give / 2);
+    digitalWrite(motorPtr->dirPin, HIGH);
+  }
+  else {
+    digitalWrite(motorPtr->dirPin, HIGH);
+    rotateSteps (motorPtr, motorPtr->give / 2);
+    digitalWrite(motorPtr->dirPin, LOW);
+  }
+}
+
+void reOff(motor* motorPtr) {
+  rotateSteps (motorPtr, motorPtr->give / 2);
 }
