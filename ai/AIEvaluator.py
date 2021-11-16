@@ -1,19 +1,22 @@
-import random
 import sys
 import os.path
+import time
+
+from model.RubiksCube import RubiksCube
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from ai.RubiksMoves import encode_to_input
-import tensorflow as tf
-import numpy as np
 from RubiksDataset import RubiksDatabase
+from AISolver import AISolver
 
 
-class AISolver:
-    def __init__(self, model_name):
-        self.model = tf.keras.models.load_model("models/" + model_name)
-
-    def get_categorical_prediction(self, state) -> int:
-        return np.argmax(self.model(np.array([state]))[0], axis=0) + 1
+def cube_from_encoding(encoding):
+    new_cube = RubiksCube()
+    faces = []
+    for face in encoding:
+        faces.append(face)
+    new_cube.faces = faces
+    print(len(new_cube.faces))
+    return new_cube
 
 
 if __name__ == '__main__':
@@ -22,19 +25,18 @@ if __name__ == '__main__':
     db = RubiksDatabase("RubiksData.db")
     wrong = 0
     total = 0
+    cube = RubiksCube()
     while True:
         total += 1
         state, scramble = db.get_data(SCRAMBLES, 9)
         state = state[0]
         scramble = scramble[0] + 1
-        ai_guess = ai_solver.get_categorical_prediction(state)
+        ai_guess = ai_solver.model.predict_single(state)
+        weighted_sum = 0
+        for i in range(len(ai_guess)):
+            weighted_sum += (1 + i) * float(ai_guess[i])
+        ai_guess = weighted_sum // 1
         if ai_guess != scramble:
             wrong += 1
             print("AI Guessed Wrong {}, Correct is {}".format(ai_guess, scramble))
-            predictions = ai_solver.model(np.array([state]))[0]
-            weighted_sum = 0
-            for i in range(len(predictions)):
-                weighted_sum += (1 + i) * float(predictions[i])
-            print("AI Average is {}".format(weighted_sum))
         print("Correct {} out of {} - {}%".format(total - wrong, total, 100 * (total - wrong) / total))
-
