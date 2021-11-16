@@ -17,8 +17,8 @@ class AISolver:
 
 
 if __name__ == '__main__':
-    SCRAMBLES = 8
-    ai_solver = AISolver("8_Training")
+    SCRAMBLES = 9
+    ai_solver = AISolver("Training")
     db = RubiksDatabase("RubiksData.db")
     wrong = 0
     total = 0

@@ -1,4 +1,5 @@
 ai/models/Training/
+ai/SQLite/*
 .idea/
 
 # Byte-compiled / optimized / DLL files

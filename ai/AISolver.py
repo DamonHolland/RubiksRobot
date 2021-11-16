@@ -6,11 +6,11 @@ from visuals.RubiksVisualizer import RubiksVisualizer
 from ai.RubiksMoves import MoveDecoder, perform_move, move_reverse, encode_to_input
 from model.RubiksCube import RubiksCube
 import tensorflow as tf
-import numpy as np
 import copy
 import time
 import itertools
 from queue import PriorityQueue
+from LiteModel import LiteModel
 
 
 class Node:
@@ -23,12 +23,13 @@ class Node:
         value_cube.faces = copy.copy(initial_cube.faces)
         for attempt_move in self.moves:
             perform_move(value_cube, attempt_move)
-        self.value = -sys.maxsize if value_cube.is_solved() else predictor(value_cube) + len(self.moves) * 1.1
+        self.value = -sys.maxsize if value_cube.is_solved() else predictor(value_cube) + len(self.moves)
 
 
 class AISolver:
     def __init__(self, model_name):
         self.model = tf.keras.models.load_model("models/" + model_name)
+        self.model = LiteModel.from_keras_model(self.model)
         self.counter = itertools.count()
 
     def solve(self, cube, time_limit):
@@ -46,12 +47,14 @@ class AISolver:
                 new_node = Node(p_node.moves + [move], cube, self.get_categorical_prediction)
                 if new_node.value == -sys.maxsize:
                     solution_node = new_node
+                    break
                 else:
                     pq.put((new_node.value, next(self.counter), new_node))
+        print("PQueue Size: {}".format(pq.qsize()))
         return solution_node.moves if solution_node else None
 
     def get_categorical_prediction(self, cube) -> int:
-        predictions = self.model(np.array([encode_to_input(cube)]))[0]
+        predictions = self.model.predict_single(encode_to_input(cube))
         weighted_sum = 0
         for i in range(len(predictions)):
             weighted_sum += (1 + i) * float(predictions[i])
@@ -59,9 +62,9 @@ class AISolver:
 
 
 if __name__ == '__main__':
-    SCRAMBLE_AMOUNT = 8
-    TIME_LIMIT = 10
-    ai_solver = AISolver("8_Training")
+    SCRAMBLE_AMOUNT = 9
+    TIME_LIMIT = 15
+    ai_solver = AISolver("9_Training")
     rubiks_cube = RubiksCube()
     visualizer = RubiksVisualizer(rubiks_cube)
     total = 0
