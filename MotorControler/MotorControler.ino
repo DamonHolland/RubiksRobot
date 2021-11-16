@@ -42,37 +42,51 @@ void setup() {
   setUpMotor(&motorArry[DOWN_MOTOR], dirPinBottom, stepPinBottom, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
   setUpMotor(&motorArry[FRONT_MOTOR], dirPinFront, stepPinFront, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
   setUpMotor(&motorArry[BACK_MOTOR], dirPinBack, stepPinBack, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
-  
+  Serial.println("Commands:");
+  Serial.println("calibrate");
+  Serial.println("test");
+  Serial.println("fast test");
 }
 
 void loop() {
-  calibrateMotors();
-  Serial.println("Done Calibrating");
-  for (int i = 0; i < 6; i++) {
-    rotateQuarter(&motorArry[i]);
-    switchDirection(&motorArry[i]);
-    rotateQuarter(&motorArry[i]);
-    delay(1000);
-  }
-  rotateQuarter(&motorArry[1]);
-  rotateQuarter(&motorArry[2]);
-  rotateQuarter(&motorArry[3]);
-  rotateQuarter(&motorArry[4]);
-  rotateQuarter(&motorArry[5]);
-  rotateQuarter(&motorArry[0]);
-  switchDirection(&motorArry[0]);
-  rotateQuarter(&motorArry[0]);
-  switchDirection(&motorArry[5]);
-  rotateQuarter(&motorArry[5]);
-  switchDirection(&motorArry[4]);
-  rotateQuarter(&motorArry[4]);
-  switchDirection(&motorArry[3]);
-  rotateQuarter(&motorArry[3]);
-  switchDirection(&motorArry[2]);
-  rotateQuarter(&motorArry[2]);
-  switchDirection(&motorArry[1]);
-  rotateQuarter(&motorArry[1]);
-  delay(1000000);
+  if(Serial.available()){
+     command = Serial.readStringUntil('\n');
+        if(command.equals("calibrate")){
+          calibrateMotors();
+          Serial.println("Done Calibrating");
+        }
+        else if(command.equals("test")){
+          for (int i = 0; i < 6; i++) {
+            rotateQuarter(&motorArry[i]);
+            delay(1000);
+            switchDirection(&motorArry[i]);
+            rotateQuarter(&motorArry[i]);
+            delay(1000);
+          }
+        }
+        if(command.equals("runFastTest")){
+          rotateQuarter(&motorArry[1]);
+          rotateQuarter(&motorArry[2]);
+          rotateQuarter(&motorArry[3]);
+          rotateQuarter(&motorArry[4]);
+          rotateQuarter(&motorArry[5]);
+          rotateQuarter(&motorArry[0]);
+          switchDirection(&motorArry[0]);
+          rotateQuarter(&motorArry[0]);
+          switchDirection(&motorArry[5]);
+          rotateQuarter(&motorArry[5]);
+          switchDirection(&motorArry[4]);
+          rotateQuarter(&motorArry[4]);
+          switchDirection(&motorArry[3]);
+          rotateQuarter(&motorArry[3]);
+          switchDirection(&motorArry[2]);
+          rotateQuarter(&motorArry[2]);
+          switchDirection(&motorArry[1]);
+          rotateQuarter(&motorArry[1]);
+          Serial.println("Did it break?");
+        }
+      Serial.flush();
+   }
 }
 
 void setUpMotor (motor* motorPtr, int dirPin, int stepPin, int maxNumSteps, int give) {
@@ -87,14 +101,12 @@ void setUpMotor (motor* motorPtr, int dirPin, int stepPin, int maxNumSteps, int 
 }
 
 void rotateQuarter (motor* motor1) {
-  reOff(&motor1);
   for (int i = 0; i < (motor1->maxNumSteps / 4); i++) {
   digitalWrite(motor1->stepPin,HIGH); 
    delayMicroseconds(250); 
    digitalWrite(motor1->stepPin,LOW); 
    delayMicroseconds(250); 
   }
-  backOff(&motor1);
 }
 
 void rotateSteps (motor* motor1, int numSteps) {
@@ -113,7 +125,13 @@ void switchDirection (motor* motor1) {
   else {
     motor1->currentDirection = HIGH;
   }
-  digitalWrite(motor1->dirPin, motor1->currentDirection); 
+  digitalWrite(motor1->dirPin, motor1->currentDirection);
+  for (int i = 0; i < motor1->give; i++) {
+  digitalWrite(motor1->stepPin,HIGH); 
+   delayMicroseconds(250); 
+   digitalWrite(motor1->stepPin,LOW); 
+   delayMicroseconds(250); 
+  }
 }
 
 void adjustMotorPosition (motor* motorPtr) {
@@ -165,24 +183,6 @@ void calibrateMotors() {
     switchDirection (&motorArry[i]);
     rotateQuarter(&motorArry[i]);
     rotateQuarter(&motorArry[i]);
-    backOff(&motorArry[i])
     delay(2500);
   }
-}
-
-void backOff(motor* motorPtr) {
-  if (motorPtr->currentDirection == HIGH) {
-    digitalWrite(motorPtr->dirPin, LOW);
-    rotateSteps (motorPtr, motorPtr->give / 2);
-    digitalWrite(motorPtr->dirPin, HIGH);
-  }
-  else {
-    digitalWrite(motorPtr->dirPin, HIGH);
-    rotateSteps (motorPtr, motorPtr->give / 2);
-    digitalWrite(motorPtr->dirPin, LOW);
-  }
-}
-
-void reOff(motor* motorPtr) {
-  rotateSteps (motorPtr, motorPtr->give / 2);
 }
