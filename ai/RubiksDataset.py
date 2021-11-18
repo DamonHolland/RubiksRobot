@@ -18,6 +18,7 @@ class RubiksDatabase:
         self.cursor.execute(
             "CREATE TABLE IF NOT EXISTS RubiksData(encoding CHAR(324), scramble INTEGER, PRIMARY KEY (encoding))")
         self.conn.commit()
+        self.session_size = self.size()
 
     def insert(self, encoding, scramble):
         encoding_string = ""
@@ -26,6 +27,8 @@ class RubiksDatabase:
         try:
             self.cursor.execute("INSERT INTO RubiksData VALUES ('{}', '{}')".format(encoding_string, scramble))
             print("Added new data for scramble {}".format(scramble))
+            self.session_size += 1
+            print("Database Size: {}".format(self.session_size))
         except sqlite3.IntegrityError:
             self.cursor.execute("SELECT scramble FROM RubiksData WHERE encoding = '{}'".format(encoding_string))
             existing_scramble = self.cursor.fetchall()[0][0]
@@ -59,10 +62,9 @@ class RubiksDatabase:
 if __name__ == '__main__':
     cube = RubiksCube()
     SCRAMBLE_AMOUNT = 9
-    MAX_SOLVE_TIME = 10
+    MAX_SOLVE_TIME = 15
     ai_solver = AISolver("8_Training")
     database = RubiksDatabase('RubiksData.db')
-    print(database.size())
     while True:
         scramble_amount = random.randint(1, SCRAMBLE_AMOUNT)
         cube.reset()

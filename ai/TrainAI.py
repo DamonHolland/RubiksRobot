@@ -16,12 +16,9 @@ def save_model(model_to_save, model_name):
 
 def create_model():
     new_model = Sequential()
-    new_model.add(InputLayer(324,))
+    new_model.add(Dense(324, input_dim=324, activation='relu'))
     new_model.add(Dense(324, activation='relu'))
-    new_model.add(Dropout(0.3))
-    new_model.add(Dense(324, activation='relu'))
-    new_model.add(Dropout(0.3))
-    new_model.add(Dense(1, activation='softmax'))
+    new_model.add(Dense(9, activation='softmax'))
     new_model.compile(optimizer=tf.keras.optimizers.Adam(), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     new_model.summary()
     return new_model
@@ -31,7 +28,7 @@ if __name__ == '__main__':
     NUM_SCRAMBLES = 9
     LOSS_GOAL = 0.2
     ACCURACY_GOAL = 1.0
-    BATCH_SIZE = 4096
+    BATCH_SIZE = 1024
     NUM_EPOCHS = 10
     EVALUATION_SIZE = 512
 

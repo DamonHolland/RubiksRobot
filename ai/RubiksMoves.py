@@ -60,7 +60,5 @@ def move_reverse(move):
 
 
 def encode_to_input(cube) -> list:
-    encoding = []
-    for face_color in cube.faces:
-        encoding += face_color
-    return list(encoding)
+    return [item for t in cube.faces for item in t]
+
