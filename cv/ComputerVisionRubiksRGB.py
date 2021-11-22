@@ -12,27 +12,25 @@ class RGBUint8:
         color = "Undefined"
 
         if hue_value < 5:
-            color = "RED"
+            #RED
+            color = (0, 0, 0, 1, 0, 0)
         elif hue_value < 22:
-            color = "ORANGE"
+            #ORANGE
+            color = (0, 1, 0, 0, 0, 0)
         elif hue_value < 33:
-            color = "YELLOW"
+            #YELLOW
+            color = (1, 0, 0, 0, 0, 0)
         elif hue_value < 78:
-            color = "GREEN"
+            #GREEN
+            color = (0, 0, 0, 0, 1, 0)
         elif hue_value < 131:
-            color = "BLUE"
-        elif hue_value < 170:
-            color = "VIOLET"
-        else:
-            color = "RED"
+            #BLUE
+            color = (0, 0, 1, 0, 0, 0)
 
         pixel_center_bgr = frame[y, x]
         b, g, r = int(pixel_center_bgr[0]), int(pixel_center_bgr[1]), int(pixel_center_bgr[2])
 
         if b > 150 and g > 150 and r > 150:
-            color = "WHITE"
-
-        if b < 30 and g < 30 and r < 30:
-            color = "BLACK"
+            color = (0, 0, 0, 0, 0, 1)
 
         return color
