@@ -1,5 +1,18 @@
 # RubiksRobot
 
+
+#Demos
+Slow-Mo:
+
+https://user-images.githubusercontent.com/70611110/142949551-c87d475c-dc7b-4376-befd-c9b718287101.mp4
+
+
+
+Sped Up:
+
+https://user-images.githubusercontent.com/70611110/142950001-e29fcfdb-c17d-4587-8655-1f7aabbb804b.mp4
+
+
 #Notes
 
 Rubik's Cube:
