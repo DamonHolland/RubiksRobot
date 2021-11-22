@@ -4,13 +4,18 @@
 #Demos
 Slow-Mo:
 
-https://user-images.githubusercontent.com/70611110/142949551-c87d475c-dc7b-4376-befd-c9b718287101.mp4
+
+https://user-images.githubusercontent.com/70611110/142950256-f690c679-d9b9-4251-b863-233e9b9fdb39.mp4
+
 
 
 
 Sped Up:
 
-https://user-images.githubusercontent.com/70611110/142950001-e29fcfdb-c17d-4587-8655-1f7aabbb804b.mp4
+
+https://user-images.githubusercontent.com/70611110/142950246-3a7ff516-1f37-40d1-ad8c-dd8923d580dc.mp4
+
+
 
 
 #Notes
