@@ -61,4 +61,3 @@ def move_reverse(move):
 
 def encode_to_input(cube) -> list:
     return [item for t in cube.faces for item in t]
-

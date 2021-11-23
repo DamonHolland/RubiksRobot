@@ -59,6 +59,7 @@ class RubiksCube:
         possible_moves = [lambda cc: self.rotate_white(cc), lambda cc: self.rotate_green(cc),
                           lambda cc: self.rotate_red(cc), lambda cc: self.rotate_blue(cc),
                           lambda cc: self.rotate_orange(cc), lambda cc: self.rotate_yellow(cc)]
+        scramble_moves = []
         encountered_states = []
         next_move = 0
         for i in range(move_count):
@@ -74,8 +75,10 @@ class RubiksCube:
                     next_move = random.randint(0, 11)
                 possible_moves[int(next_move / 2)](next_move % 2)
                 next_state = copy.copy(self.faces)
+            scramble_moves.append(next_move)
             self.last_move2 = self.last_move
             self.last_move = next_move
+        return scramble_moves
 
     def rotate_white(self, cc=False):
         if self.verbose:

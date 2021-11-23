@@ -10,7 +10,7 @@ import copy
 import time
 import itertools
 from queue import PriorityQueue
-from LiteModel import LiteModel
+from ai.LiteModel import LiteModel
 
 
 class Node:
@@ -27,8 +27,8 @@ class Node:
 
 
 class AISolver:
-    def __init__(self, model_name):
-        self.model = tf.keras.models.load_model("models/" + model_name)
+    def __init__(self, model_dir):
+        self.model = tf.keras.models.load_model(model_dir)
         self.model = LiteModel.from_keras_model(self.model)
         self.counter = itertools.count()
 
@@ -50,7 +50,6 @@ class AISolver:
                     break
                 else:
                     pq.put((new_node.value, next(self.counter), new_node))
-        print("PQueue Size: {}".format(pq.qsize()))
         return solution_node.moves if solution_node else None
 
     def get_categorical_prediction(self, cube) -> int:
@@ -62,9 +61,9 @@ class AISolver:
 
 
 if __name__ == '__main__':
-    SCRAMBLE_AMOUNT = 9
+    SCRAMBLE_AMOUNT = 10
     TIME_LIMIT = 15
-    ai_solver = AISolver("9_Training")
+    ai_solver = AISolver("models/9_Training")
     rubiks_cube = RubiksCube()
     visualizer = RubiksVisualizer(rubiks_cube)
     total = 0
@@ -77,6 +76,10 @@ if __name__ == '__main__':
         rubiks_cube.scramble(SCRAMBLE_AMOUNT)
         solve_moves = ai_solver.solve(rubiks_cube, TIME_LIMIT)
         if solve_moves:
+            solve_parsed = []
+            for move in solve_moves:
+                solve_parsed.append(MoveDecoder[move])
+            print(solve_parsed)
             success += 1
             print("AI solved cube in {} moves.".format(len(solve_moves)))
             print("AI solved cube in {} seconds.".format(round(time.time() - start_t, 2)))
@@ -84,6 +87,7 @@ if __name__ == '__main__':
                 # time.sleep(0.5)
                 perform_move(rubiks_cube, solve_move)
         else:
+
             print("AI failed to solve cube in {} seconds".format(TIME_LIMIT))
         total += 1
         print("Cube solved {} out of {} times ({}%).\n\n".format(success, total, 100 * success / total))
