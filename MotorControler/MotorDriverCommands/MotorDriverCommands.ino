@@ -47,6 +47,7 @@ void setup() {
   Serial.println("test");
   Serial.println("fast test");
   Serial.println("command input");
+  memset(buff, '\0', MAX_COMMAND_SIZE);
 
 }
 
@@ -59,7 +60,8 @@ void loop() {
           }
           command = Serial.readStringUntil('\n');
           command.toCharArray(buff, MAX_COMMAND_SIZE);
-          parseCommandFromLine(buff, &currentPos);
+          while(parseCommandFromLine(buff, &currentPos)) {
+          }
         }
         else if(command.equals("test")){
           for (int i = 0; i < 6; i++) {
@@ -91,7 +93,6 @@ void loop() {
           rotateQuarter(&motorArry[1]);
           Serial.println("Did it break?");
         }
-      Serial.flush();
    }
 }
 
@@ -125,22 +126,22 @@ void switchDirection (motor* motorPtr) {
   digitalWrite(motorPtr->dirPin, motorPtr->currentDirection);
 }
 
-void parseCommandFromLine(const char* Line, int* currentPos) {
+bool parseCommandFromLine(const char* Line, int* currentPos) {
   int steps = 0;
   int numDigits = 0;
-  int power = 0;
   char motor = '!';
+  bool returnVal = true;
   
   motor = Line[*currentPos];
-  *currentPos++;
-  while(isDigit(Line[*currentPos])) {
-    numDigits++;
-    currentPos++;
+  (*currentPos) += 1;
+  steps = atoi(&Line[*currentPos]);
+  while(isDigit(Line[*currentPos]) && *currentPos < 100) {
+    *currentPos += 1;
   }
-  for (int i = *currentPos - 1; i > (*currentPos - numDigits - 1); i--) {
-    steps += atoi(&Line[i]) * pow(10, power);
-    power++;
+  if(Line[*currentPos] == '\0' || *currentPos == 99) {
+    returnVal = false;
   }
   Serial.println(motor);
   Serial.println(steps);
+  return returnVal;
 }
