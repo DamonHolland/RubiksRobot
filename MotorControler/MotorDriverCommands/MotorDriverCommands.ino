@@ -67,7 +67,7 @@ void loop() {
           for (int i = 0; i < 6; i++) {
             rotateQuarter(&motorArry[i]);
             delay(1000);
-            switchDirection(&motorArry[i]);
+            switchDirection(&motorArry[i], true);
             rotateQuarter(&motorArry[i]);
             delay(1000);
           }
@@ -79,17 +79,17 @@ void loop() {
           rotateQuarter(&motorArry[4]);
           rotateQuarter(&motorArry[5]);
           rotateQuarter(&motorArry[0]);
-          switchDirection(&motorArry[0]);
+          switchDirection(&motorArry[0], true);
           rotateQuarter(&motorArry[0]);
-          switchDirection(&motorArry[5]);
+          switchDirection(&motorArry[5], true);
           rotateQuarter(&motorArry[5]);
-          switchDirection(&motorArry[4]);
+          switchDirection(&motorArry[4], true);
           rotateQuarter(&motorArry[4]);
-          switchDirection(&motorArry[3]);
+          switchDirection(&motorArry[3], true);
           rotateQuarter(&motorArry[3]);
-          switchDirection(&motorArry[2]);
+          switchDirection(&motorArry[2], true);
           rotateQuarter(&motorArry[2]);
-          switchDirection(&motorArry[1]);
+          switchDirection(&motorArry[1], true);
           rotateQuarter(&motorArry[1]);
           Serial.println("Did it break?");
         }
@@ -107,6 +107,26 @@ void setUpMotor (motor* motorPtr, int dirPin, int stepPin, int maxNumSteps, int 
   pinMode(stepPin, OUTPUT);
 }
 
+void rotateSteps (motor* motor1, int numSteps) {
+  for (int i = 0; i < numSteps; i++) {
+  digitalWrite(motor1->stepPin,HIGH); 
+   delayMicroseconds(250); 
+   digitalWrite(motor1->stepPin,LOW); 
+   delayMicroseconds(250); 
+  }
+}
+
+void rotateStepsParallel (motor* motor1, motor* motor2, int numSteps) {
+  for (int i = 0; i < numSteps; i++) {
+  digitalWrite(motor1->stepPin,HIGH); 
+  digitalWrite(motor2->stepPin,HIGH);
+   delayMicroseconds(250); 
+   digitalWrite(motor1->stepPin,LOW);
+   digitalWrite(motor2->stepPin,LOW);
+   delayMicroseconds(250); 
+  }
+}
+
 void rotateQuarter (motor* motorPtr) {
   for (int i = 0; i < (motorPtr->maxNumSteps / 4); i++) {
   digitalWrite(motorPtr->stepPin,HIGH); 
@@ -116,11 +136,11 @@ void rotateQuarter (motor* motorPtr) {
   }
 }
 
-void switchDirection (motor* motorPtr) {
-  if (motorPtr->currentDirection == HIGH) {
+void switchDirection (motor* motorPtr, bool isNegative) {
+  if (motorPtr->currentDirection == HIGH && isNegative) {
     motorPtr->currentDirection = LOW;
   }
-  else {
+  else if (motorPtr->currentDirection == LOW && !isNegative){
     motorPtr->currentDirection = HIGH;
   }
   digitalWrite(motorPtr->dirPin, motorPtr->currentDirection);
@@ -131,6 +151,7 @@ bool parseCommandFromLine(const char* Line, int* currentPos) {
   int numDigits = 0;
   char motor = '!';
   bool returnVal = true;
+  bool isNegative = false;
   
   motor = Line[*currentPos];
   (*currentPos) += 1;
@@ -141,7 +162,52 @@ bool parseCommandFromLine(const char* Line, int* currentPos) {
   if(Line[*currentPos] == '\0' || *currentPos == 99) {
     returnVal = false;
   }
+  if(steps < 0) {
+    isNegative = true;
+    steps *= -1;
+  }
   Serial.println(motor);
   Serial.println(steps);
+  Serial.println(isNegative);
   return returnVal;
+}
+
+void runCommand (char motorChar, int steps, bool isNeg) {
+  motor* theMotor = findMotor(motorChar);
+  switchDirection (theMotor, isNeg);
+  rotateSteps(theMotor, steps);
+}
+
+void runParallelCommand (char motorChar1, char motorChar2, int steps, bool isNeg1, bool isNeg2) {
+  motor* theMotor1 = findMotor(motorChar1);
+  motor* theMotor2 = findMotor(motorChar2);
+  switchDirection (theMotor1, isNeg1);
+  switchDirection (theMotor1, isNeg2);
+  rotateStepsParallel(theMotor1, theMotor2, steps);
+}
+
+motor* findMotor (char motorChar) {
+  motor* theMotor = NULL;
+
+  switch(motorChar) {
+    case 'R':
+    theMotor = &motorArry[RIGHT_MOTOR];
+    break;
+    case 'L': 
+    theMotor = &motorArry[LEFT_MOTOR];
+    break;
+    case 'U': 
+    theMotor = &motorArry[UP_MOTOR];
+    break;
+    case 'D': 
+    theMotor = &motorArry[DOWN_MOTOR];
+    break;
+    case 'F': 
+    theMotor = &motorArry[FRONT_MOTOR];
+    break;
+    case 'B': 
+    theMotor = &motorArry[BACK_MOTOR];
+    break;
+  };
+  return theMotor;
 }
