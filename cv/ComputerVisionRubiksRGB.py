@@ -26,6 +26,9 @@ class RGBUint8:
         elif hue_value < 131:
             #BLUE
             color = (0, 0, 1, 0, 0, 0)
+        else:
+            #RED
+            color = (0, 0, 0, 1, 0, 0)
 
         pixel_center_bgr = frame[y, x]
         b, g, r = int(pixel_center_bgr[0]), int(pixel_center_bgr[1]), int(pixel_center_bgr[2])

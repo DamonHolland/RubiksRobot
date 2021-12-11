@@ -1,4 +1,4 @@
-import cv2
+import cv2 as cv2
 import numpy as np
 import ComputerVisionRubiksRGB
 
@@ -14,7 +14,7 @@ def mouseRGB(event,x,y,flags,param):
         print("Blue: ",colorsB)
         print("BRG Format: ",colors)
         print("Coordinates of pixel: X: ",x,"Y: ",y)
-        
+
         print("PIXEL CENTER")
         print(ComputerVisionRubiksRGB.RGBUint8.identifyBGR(frame, x, y))
 
@@ -22,7 +22,7 @@ def mouseRGB(event,x,y,flags,param):
 cv2.namedWindow('mouseRGB')
 cv2.setMouseCallback('mouseRGB',mouseRGB)
 
-capture = cv2.VideoCapture(0)
+capture = cv2.VideoCapture(1)
 
 while(True):
 
@@ -30,7 +30,7 @@ while(True):
 
     cv2.imshow('mouseRGB', frame)
 
-    if cv2.waitKey(1) == 27:
+    if cv2.waitKey(1) == 'q':
         break
 
 capture.release()
