@@ -8,17 +8,33 @@ from ai.RubiksMoves import MoveDecoder
 import time
 import serial
 
+SCRAMBLE_AMOUNT = 11
+TIME_LIMIT = 15
+SPEED = "125"
+COM_PORT = "COM3"
+BAUDRATE = 9600
+
 PARALLEL_MOVES = {"U": "D",
                   "D": "U",
                   "F": "B",
                   "B": "F",
                   "L": "R",
                   "R": "L"}
-SCRAMBLE_AMOUNT = 10
-TIME_LIMIT = 15
-SPEED = "200"
-COM_PORT = "COM6"
-BAUDRATE = 9600
+
+def sendSerial(serial_message):
+    serial_message += "\n"
+    print("Serial Input: {}".format(serial_message))
+    ser = serial.Serial()
+    ser.baudrate = BAUDRATE
+    ser.port = COM_PORT
+    ser.open()
+    time.sleep(5)
+    if not ser.isOpen():
+        print("Failed to open Serial")
+    ser.write(serial_message.encode())
+    time.sleep(1)
+    print(ser.getLine())
+    ser.close()
 
 
 def parseMoves(move_array):
@@ -45,19 +61,6 @@ def parseMoves(move_array):
             move_array.pop(i)
         i += 1
     return SPEED + ' ' + ' '.join(move_array)
-
-
-def sendSerial(serial_message):
-    print("Serial Input: {}".format(serial_message))
-    ser = serial.Serial()
-    ser.baudrate = BAUDRATE
-    ser.port = COM_PORT
-    ser.open()
-    if not ser.isOpen():
-        print("Failed to open Serial")
-    ser.write(serial_message.encode())
-    ser.close()
-
 
 def PhysicalSolve():
     ai_solver = AISolver("../ai/models/9_Training")
