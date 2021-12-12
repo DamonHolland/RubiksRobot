@@ -4,11 +4,11 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from ai.AISolver import AISolver
 from model.RubiksCube import RubiksCube
-from ai.RubiksMoves import MoveDecoder
+from ai.RubiksMoves import MoveDecoder, move_reverse
 import time
 import serial
 
-SCRAMBLE_AMOUNT = 11
+SCRAMBLE_AMOUNT = 10
 TIME_LIMIT = 15
 SPEED = "125"
 COM_PORT = "COM3"
@@ -20,21 +20,6 @@ PARALLEL_MOVES = {"U": "D",
                   "B": "F",
                   "L": "R",
                   "R": "L"}
-
-def sendSerial(serial_message):
-    serial_message += "\n"
-    print("Serial Input: {}".format(serial_message))
-    ser = serial.Serial()
-    ser.baudrate = BAUDRATE
-    ser.port = COM_PORT
-    ser.open()
-    time.sleep(5)
-    if not ser.isOpen():
-        print("Failed to open Serial")
-    ser.write(serial_message.encode())
-    time.sleep(1)
-    print(ser.getLine())
-    ser.close()
 
 
 def parseMoves(move_array):
@@ -62,6 +47,22 @@ def parseMoves(move_array):
         i += 1
     return SPEED + ' ' + ' '.join(move_array)
 
+
+def sendSerial(serial_message):
+    print("Serial Input: {}".format(serial_message))
+    ser = serial.Serial()
+    ser.baudrate = BAUDRATE
+    ser.port = COM_PORT
+    try:
+        ser.open()
+        time.sleep(5)
+    except serial.serialutil.SerialException:
+        print("Failed to open Serial")
+        ser.close()
+        return
+    ser.write(serial_message.encode())
+
+
 def PhysicalSolve():
     ai_solver = AISolver("../ai/models/9_Training")
     rubiks_cube = RubiksCube()
@@ -69,23 +70,24 @@ def PhysicalSolve():
     # Scan Cube for AI to solve - For Now we just scramble ourselves.
     print("Scrambled cube {} moves.".format(SCRAMBLE_AMOUNT))
     scramble = rubiks_cube.scramble(SCRAMBLE_AMOUNT)
+    scramble_reverse = [move_reverse(i) for i in scramble]
+    scramble_reverse.reverse()
+    scramble_reverse = [MoveDecoder[i] for i in scramble_reverse]
     scramble = [MoveDecoder[i] for i in scramble]
     print("Scramble: {}".format(str(scramble)))
 
     # Send Scramble to Motors
-    try:
-        sendSerial(parseMoves(scramble))
-    except:
-        pass
+    sendSerial(parseMoves(scramble))
 
     # Use AI To Calculate Solve
     start_t = time.time()
     solve_moves = ai_solver.solve(rubiks_cube, TIME_LIMIT)
-    solve_moves = [MoveDecoder[i] for i in solve_moves]
     if not solve_moves:
         print("AI Failed to Find Solution")
-        return
-    print("AI solved cube in {} seconds.".format(round(time.time() - start_t, 2)))
+        solve_moves = scramble_reverse
+    else:
+        solve_moves = [MoveDecoder[i] for i in solve_moves]
+        print("AI solved cube in {} seconds.".format(round(time.time() - start_t, 2)))
     print("Solve: {}".format(str(solve_moves)))
 
     # Delay before solving, so we can see the scramble
@@ -93,10 +95,8 @@ def PhysicalSolve():
         time.sleep(2 - (time.time() - start_t))
 
     # Send Solve to Motors
-    try:
-        sendSerial(parseMoves(solve_moves))
-    except:
-        pass
+    sendSerial(parseMoves(solve_moves))
+
 
 if __name__ == '__main__':
     PhysicalSolve()
