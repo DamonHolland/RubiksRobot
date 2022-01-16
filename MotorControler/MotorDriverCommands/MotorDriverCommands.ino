@@ -1,15 +1,21 @@
 #define dirPinRight 2
 #define stepPinRight 8
+#define enPinRight 34
 #define dirPinFront 3
 #define stepPinFront 9
+#define enPinFront 34
 #define dirPinBottom 4
 #define stepPinBottom 10
-#define dirPinLeft 5
-#define stepPinLeft 11
+#define enPinBottom 34
+#define dirPinLeft 30
+#define stepPinLeft 28
+#define enPinLeft 32
 #define dirPinBack 6
 #define stepPinBack 12
+#define enPinBack 34
 #define dirPinTop 7
 #define stepPinTop 13
+#define enPinTop 34
 
 const int MAX_NUM_STEPS = 1600;
 const int DELAY_SPEED = 500;
@@ -26,6 +32,7 @@ int motorDelay = 250;
 typedef struct {
   int dirPin = 0;
   int stepPin = 0;
+  int enPin = 0;
   int maxNumSteps = 0;
   int currentDirection = HIGH;
   int give = 0;
@@ -38,12 +45,12 @@ char buff[100];
 void setup() {
    // put your setup code here, to run once:
   Serial.begin(9600);
-  setUpMotor(&motorArry[RIGHT_MOTOR], dirPinRight, stepPinRight, MAX_NUM_STEPS, (MAX_NUM_STEPS / 16));
-  setUpMotor(&motorArry[LEFT_MOTOR], dirPinLeft, stepPinLeft, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
-  setUpMotor(&motorArry[UP_MOTOR], dirPinTop, stepPinTop, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
-  setUpMotor(&motorArry[DOWN_MOTOR], dirPinBottom, stepPinBottom, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
-  setUpMotor(&motorArry[FRONT_MOTOR], dirPinFront, stepPinFront, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
-  setUpMotor(&motorArry[BACK_MOTOR], dirPinBack, stepPinBack, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
+  setUpMotor(&motorArry[RIGHT_MOTOR], dirPinRight, stepPinRight, enPinRight, MAX_NUM_STEPS, (MAX_NUM_STEPS / 16));
+  setUpMotor(&motorArry[LEFT_MOTOR], dirPinLeft, stepPinLeft, enPinLeft, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
+  setUpMotor(&motorArry[UP_MOTOR], dirPinTop, stepPinTop,enPinTop, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
+  setUpMotor(&motorArry[DOWN_MOTOR], dirPinBottom, stepPinBottom, enPinBottom, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
+  setUpMotor(&motorArry[FRONT_MOTOR], dirPinFront, stepPinFront, enPinFront, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
+  setUpMotor(&motorArry[BACK_MOTOR], dirPinBack, stepPinBack, enPinBack, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
   //Serial.println("Commands:");
   //Serial.println("test");
   //Serial.println("fast test");
@@ -69,8 +76,9 @@ void loop() {
    }
 }
 
-void setUpMotor (motor* motorPtr, int dirPin, int stepPin, int maxNumSteps, int give) {
+void setUpMotor (motor* motorPtr, int dirPin, int stepPin, int enPin, int maxNumSteps, int give) {
   motorPtr->dirPin = dirPin;
+  motorPtr->enPin = enPin;
   motorPtr->stepPin = stepPin;
   motorPtr->maxNumSteps = maxNumSteps;
   motorPtr->currentDirection = LOW;
@@ -78,18 +86,24 @@ void setUpMotor (motor* motorPtr, int dirPin, int stepPin, int maxNumSteps, int 
   pinMode(dirPin, OUTPUT);
   digitalWrite(dirPin, LOW);
   pinMode(stepPin, OUTPUT);
+  pinMode(enPin, OUTPUT);
+  digitalWrite(enPin, HIGH);
 }
 
 void rotateSteps (motor* motor1, int numSteps) {
+  digitalWrite(motor1->enPin, LOW);
   for (int i = 0; i < numSteps; i++) {
   digitalWrite(motor1->stepPin,HIGH); 
    delayMicroseconds(motorDelay); 
    digitalWrite(motor1->stepPin,LOW); 
    delayMicroseconds(motorDelay); 
   }
+  digitalWrite(motor1->enPin, HIGH);
 }
 
 void rotateStepsParallel (motor* motor1, motor* motor2, int numSteps1, int numSteps2) {
+  digitalWrite(motor1->enPin, LOW);
+  digitalWrite(motor2->enPin, LOW);
   if (numSteps1 == numSteps2) {
     //Serial.println(numSteps1);
     for (int i = 0; i < numSteps1; i++) {
@@ -135,7 +149,8 @@ void rotateStepsParallel (motor* motor1, motor* motor2, int numSteps1, int numSt
       delayMicroseconds(motorDelay); 
     }
   }
-  
+  digitalWrite(motor1->enPin, HIGH);
+  digitalWrite(motor2->enPin, HIGH);
 }
 
 void rotateQuarter (motor* motorPtr) {
