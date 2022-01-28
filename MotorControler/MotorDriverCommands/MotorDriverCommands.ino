@@ -1,21 +1,21 @@
-#define dirPinRight 2
-#define stepPinRight 8
-#define enPinRight 34
-#define dirPinFront 3
-#define stepPinFront 9
-#define enPinFront 34
-#define dirPinBottom 4
-#define stepPinBottom 10
-#define enPinBottom 34
+#define dirPinRight 39
+#define stepPinRight 37
+#define enPinRight 413
+#define dirPinFront 36
+#define stepPinFront 34
+#define enPinFront 38
+#define dirPinBottom 49
+#define stepPinBottom 47
+#define enPinBottom 51
 #define dirPinLeft 30
 #define stepPinLeft 28
 #define enPinLeft 32
-#define dirPinBack 6
-#define stepPinBack 12
-#define enPinBack 34
-#define dirPinTop 7
-#define stepPinTop 13
-#define enPinTop 34
+#define dirPinBack 25
+#define stepPinBack 23
+#define enPinBack 27
+#define dirPinTop 24
+#define stepPinTop 22
+#define enPinTop 26
 
 const int MAX_NUM_STEPS = 1600;
 const int DELAY_SPEED = 500;
