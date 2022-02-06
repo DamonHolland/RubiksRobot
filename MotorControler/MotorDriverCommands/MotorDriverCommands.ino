@@ -1,6 +1,7 @@
+#include <TM1637Display.h>
 #define dirPinRight 39
 #define stepPinRight 37
-#define enPinRight 413
+#define enPinRight 41
 #define dirPinFront 36
 #define stepPinFront 34
 #define enPinFront 38
@@ -16,6 +17,8 @@
 #define dirPinTop 24
 #define stepPinTop 22
 #define enPinTop 26
+#define CLK 33
+#define DIO 31
 
 const int MAX_NUM_STEPS = 1600;
 const int DELAY_SPEED = 500;
@@ -28,6 +31,26 @@ const int FRONT_MOTOR = 4;
 const int BACK_MOTOR = 5;
 int MAX_COMMAND_SIZE = 100;
 int motorDelay = 250;
+unsigned long startTime;
+unsigned long currentTime;
+unsigned long endTime;
+
+// Create display object of type TM1637Display:
+TM1637Display display = TM1637Display(CLK, DIO);
+
+// Create array that turns all segments on:
+const uint8_t data[] = {0xff, 0xff, 0xff, 0xff};
+
+// Create array that turns all segments off:
+const uint8_t blank[] = {0x00, 0x00, 0x00, 0x00};
+
+// You can set the individual segments per digit to spell words or create other symbols:
+const uint8_t done[] = {
+  SEG_B | SEG_C | SEG_D | SEG_E | SEG_G,           // d
+  SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F,   // O
+  SEG_C | SEG_E | SEG_G,                           // n
+  SEG_A | SEG_D | SEG_E | SEG_F | SEG_G            // E
+};
 
 typedef struct {
   int dirPin = 0;
@@ -56,7 +79,13 @@ void setup() {
   //Serial.println("fast test");
   //Serial.println("command input");
   memset(buff, '\0', MAX_COMMAND_SIZE);
-
+  // Set the brightness:
+  display.setBrightness(7);
+  // All segments on:
+  display.setSegments(data);
+  delay(1000);
+  display.clear();
+  startTimer();
 }
 
 void loop() {
@@ -69,8 +98,10 @@ void loop() {
           command = Serial.readStringUntil('\n');
           Serial.println(command);
           command.toCharArray(buff, MAX_COMMAND_SIZE);
+          startTimer();
           while(parseCommandFromLine(buff, &currentPos)) {
           }
+          endTimer();
           memset(buff, '\0', MAX_COMMAND_SIZE);
           command = "";
    }
@@ -105,7 +136,6 @@ void rotateStepsParallel (motor* motor1, motor* motor2, int numSteps1, int numSt
   digitalWrite(motor1->enPin, LOW);
   digitalWrite(motor2->enPin, LOW);
   if (numSteps1 == numSteps2) {
-    //Serial.println(numSteps1);
     for (int i = 0; i < numSteps1; i++) {
     digitalWrite(motor1->stepPin,HIGH); 
     digitalWrite(motor2->stepPin,HIGH);
@@ -236,7 +266,6 @@ bool parseCommandFromLine(const char* Line, int* currentPos) {
     returnVal = false;
   }
   
-  
   return returnVal;
 }
 
@@ -278,4 +307,16 @@ motor* findMotor (char motorChar) {
     break;
   };
   return theMotor;
+}
+
+void startTimer() {
+  startTime = millis() / 10.0;
+  endTime = millis() / 10.0;
+  currentTime = 0;
+  display.showNumberDecEx(currentTime, 0b01000000, true);
+}
+
+void endTimer() {
+  endTime = (millis() / 10.0) - startTime;
+  display.showNumberDecEx(endTime, 0b01000000, true);
 }
