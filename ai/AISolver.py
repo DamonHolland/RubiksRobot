@@ -11,6 +11,7 @@ import time
 import itertools
 from queue import PriorityQueue
 from ai.LiteModel import LiteModel
+from ai.KociembaSolver import KociembaSolver
 
 
 class Node:
@@ -50,7 +51,11 @@ class AISolver:
                     break
                 else:
                     pq.put((new_node.value, next(self.counter), new_node))
-        return solution_node.moves if solution_node else None
+        if not solution_node:
+            k_solver = KociembaSolver()
+            print("AI did not find solution. Kociembas algorithm was used as backup.")
+            return k_solver.solve(cube)
+        return solution_node.moves
 
     def get_categorical_prediction(self, cube) -> int:
         predictions = self.model.predict_single(encode_to_input(cube))
@@ -62,14 +67,14 @@ class AISolver:
 
 if __name__ == '__main__':
     SCRAMBLE_AMOUNT = 10
-    TIME_LIMIT = 15
+    TIME_LIMIT = 10
     ai_solver = AISolver("models/9_Training")
     rubiks_cube = RubiksCube()
     visualizer = RubiksVisualizer(rubiks_cube)
     total = 0
     success = 0
     while True:
-        # time.sleep(1.0)
+        time.sleep(1.0)
         rubiks_cube.reset()
         start_t = time.time()
         print("Scrambled cube {} moves.".format(SCRAMBLE_AMOUNT))
@@ -84,7 +89,7 @@ if __name__ == '__main__':
             print("AI solved cube in {} moves.".format(len(solve_moves)))
             print("AI solved cube in {} seconds.".format(round(time.time() - start_t, 2)))
             for solve_move in solve_moves:
-                # time.sleep(0.5)
+                time.sleep(0.5)
                 perform_move(rubiks_cube, solve_move)
         else:
 
