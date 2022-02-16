@@ -8,8 +8,8 @@ from ai.RubiksMoves import MoveDecoder, move_reverse
 import time
 import serial
 
-SCRAMBLE_AMOUNT = 10
-TIME_LIMIT = 15
+SCRAMBLE_AMOUNT = 100
+TIME_LIMIT = 10
 SPEED = "90"
 COM_PORT = "COM4"
 BAUDRATE = 9600
