@@ -21,8 +21,8 @@ def cube_from_encoding(encoding):
 
 if __name__ == '__main__':
     SCRAMBLES = 9
-    ai_solver = AISolver("Training")
-    db = RubiksDatabase("RubiksData.db")
+    ai_solver = AISolver("models/9_Training")
+    db = RubiksDatabase()
     wrong = 0
     total = 0
     cube = RubiksCube()
