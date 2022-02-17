@@ -4,21 +4,22 @@ import ComputerVisionRubiksRGB
 
 frameWidth = 720
 frameHeight = 720
-cap = cv.VideoCapture(1)
-cap.set(3, frameWidth)
-cap.set(4, frameHeight)
+capTop = cv.VideoCapture(2)
+capBot = cv.VideoCapture(1)
 
-colors = [[(128, 158), (), (), (), (), (), (), ()],
-          [(), (), (), (), (), (), (), ()],
-          [(), (), (), (), (), (), (), ()]]
+capTop.set(3, frameWidth)
+capTop.set(4, frameHeight)
 
-test = [[(135, 161)],
-        [(158, 154)],
-        [(195, 141)]]
+capBot.set(3, frameWidth)
+capBot.set(4, frameHeight)
 
-if not cap.isOpened():
-    print("Camera cannot be opened. Exiting...")
-    exit()
+colorsTop = [[(327, 108), (353, 120), (383, 142), (272, 122), (305, 134), (356, 163), (245, 141), (272, 165), (318, 187)],
+          [(232, 180), (268, 196), (299, 217), (224, 208), (255, 228), (301, 250), (223, 241), (270, 284), (305, 297)],
+          [(335, 231), (378, 197), (398, 181), (337, 254), (369, 233), (408, 203), (342, 297), (361, 282), (407, 236)]]
+
+colorsBot = [[(403, 265), (352, 301), (330, 315), (408, 234), (362, 262), (331, 275), (408, 209), (367, 226), (328, 245)],
+          [(296, 312), (270, 297), (229, 259), (295, 278), (261, 248), (228, 221), (298, 245), (260, 214), (232, 192)],
+          [(314, 207), (279, 184), (248, 159), (358, 191), (320, 159), (280, 137), (389, 170), (366, 148), (338, 127)]]
 
 
 def drawCircle (frame, pixelArray):
@@ -29,23 +30,34 @@ def drawCircle (frame, pixelArray):
     return frame
 
 
-def defineColors (frame, pixelArray):
+def defineColors (frame, pixelArray, retVal):
     for row in pixelArray:
         for pixel in row:
-            print("Coordinates: (", str(pixel[0]), ", ", str(pixel[1]), ") is ", ComputerVisionRubiksRGB.RGBUint8.identifyBGR(frame, pixel[0], pixel[1]))
+            print("HELLOOOO ", ComputerVisionRubiksRGB.RGBUint8.identifyBGR(frame, pixel[0], pixel[1]))
+            retVal.append(str(ComputerVisionRubiksRGB.RGBUint8.identifyBGR(frame, pixel[0], pixel[1])))
 
+    return retVal
 
 if __name__ == '__main__':
     while True:
-        ret, frame = cap.read()
+        retTop, frameTop = capTop.read()
+        retBot, frameBot = capBot.read()
 
-        frame = drawCircle(frame, test)
+        frameTop = drawCircle(frameTop, colorsTop)
+        frameBot = drawCircle(frameBot, colorsBot)
 
-        cv.imshow('Rubiks Cube Viewer', frame)
+        cv.imshow('Rubiks Cube Top', frameTop)
+        cv.imshow('Rubiks Cube Bot', frameBot)
 
         if cv.waitKey(1) == ord('q'):
-            defineColors(frame, test)
+            onehotencoding = []
+
+            onehotencoding = (frameTop, colorsTop, onehotencoding)
+            onehotencoding = (frameBot, colorsBot, onehotencoding)
+
+            print(onehotencoding)
             break
 
-    cap.release()
+    capTop.release()
+    capBot.release()
     cv.destroyAllWindows()
