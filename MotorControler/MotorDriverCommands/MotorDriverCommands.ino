@@ -1,13 +1,13 @@
 #include <TM1637Display.h>
-#define dirPinRight 39
-#define stepPinRight 37
-#define enPinRight 41
+#define dirPinRight 45
+#define stepPinRight 43
+#define enPinRight 47
 #define dirPinFront 36
 #define stepPinFront 34
 #define enPinFront 38
-#define dirPinBottom 49
-#define stepPinBottom 47
-#define enPinBottom 51
+#define dirPinBottom 51
+#define stepPinBottom 49
+#define enPinBottom 53
 #define dirPinLeft 30
 #define stepPinLeft 28
 #define enPinLeft 32
@@ -17,8 +17,12 @@
 #define dirPinTop 24
 #define stepPinTop 22
 #define enPinTop 26
-#define CLK 33
-#define DIO 31
+#define CLK1 29
+#define DIO1 31
+#define CLK2 33
+#define DIO2 35
+#define bttn1 39
+#define bttn2 41
 
 const int MAX_NUM_STEPS = 1600;
 const int DELAY_SPEED = 500;
@@ -34,9 +38,11 @@ int motorDelay = 250;
 unsigned long startTime;
 unsigned long currentTime;
 unsigned long endTime;
+int numMoves = 0;
 
 // Create display object of type TM1637Display:
-TM1637Display display = TM1637Display(CLK, DIO);
+TM1637Display display1 = TM1637Display(CLK1, DIO1);
+TM1637Display display2 = TM1637Display(CLK2, DIO2);
 
 // Create array that turns all segments on:
 const uint8_t data[] = {0xff, 0xff, 0xff, 0xff};
@@ -45,11 +51,12 @@ const uint8_t data[] = {0xff, 0xff, 0xff, 0xff};
 const uint8_t blank[] = {0x00, 0x00, 0x00, 0x00};
 
 // You can set the individual segments per digit to spell words or create other symbols:
-const uint8_t done[] = {
-  SEG_B | SEG_C | SEG_D | SEG_E | SEG_G,           // d
-  SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F,   // O
-  SEG_C | SEG_E | SEG_G,                           // n
-  SEG_A | SEG_D | SEG_E | SEG_F | SEG_G            // E
+const uint8_t wait[] = {
+  SEG_B | SEG_C | SEG_D | SEG_E | SEG_F | SEG_G,           // w
+};
+
+const uint8_t red[] = {
+  SEG_A | SEG_C | SEG_D | SEG_E | SEG_F,           // g
 };
 
 typedef struct {
@@ -74,36 +81,41 @@ void setup() {
   setUpMotor(&motorArry[DOWN_MOTOR], dirPinBottom, stepPinBottom, enPinBottom, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
   setUpMotor(&motorArry[FRONT_MOTOR], dirPinFront, stepPinFront, enPinFront, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
   setUpMotor(&motorArry[BACK_MOTOR], dirPinBack, stepPinBack, enPinBack, MAX_NUM_STEPS, MAX_NUM_STEPS / 16);
-  //Serial.println("Commands:");
-  //Serial.println("test");
-  //Serial.println("fast test");
-  //Serial.println("command input");
   memset(buff, '\0', MAX_COMMAND_SIZE);
-  // Set the brightness:
-  display.setBrightness(7);
-  // All segments on:
-  display.setSegments(data);
+  pinMode(bttn1, OUTPUT);
+  pinMode(bttn2, OUTPUT);
+  display1.setBrightness(7);
+  display2.setBrightness(7);
+  display1.setSegments(data);
+  display2.setSegments(data);
+  clearTimer();
   delay(1000);
-  display.clear();
   startTimer();
 }
 
 void loop() {
-  //Serial.println("you made it");
   if(Serial.available()){
-    
+    clearTimer();
+    display2.setSegments(blank);
+    display2.setSegments(wait);
           int currentPos = 0;
           while(!Serial.available()) {
           }
           command = Serial.readStringUntil('\n');
           Serial.println(command);
           command.toCharArray(buff, MAX_COMMAND_SIZE);
+          display2.setSegments(blank);
+          display2.setSegments(red);
+          while(digitalRead(bttn1) == LOW){};
           startTimer();
           while(parseCommandFromLine(buff, &currentPos)) {
           }
           endTimer();
           memset(buff, '\0', MAX_COMMAND_SIZE);
           command = "";
+   }
+   else if (digitalRead(bttn2) == HIGH) {
+    scrambleCube();
    }
 }
 
@@ -244,22 +256,13 @@ bool parseCommandFromLine(const char* Line, int* currentPos) {
   }
   //do both
   *currentPos += 1;
-  //Serial.println("Two");
-  //Serial.println(motor1);
-  //Serial.println(steps1);
-  //Serial.println(isNegative1);
-  //Serial.println(motor2);
-  //Serial.println(steps2);
-  //Serial.println(isNegative2);
+  numMoves++;
   runParallelCommand(motor1, motor2, (steps1/90 * 400), (steps2/90 * 400), isNegative1, isNegative2);
   }
   else {
    //do one
    *currentPos += 1;
-   //Serial.println("One");
-  //Serial.println(motor1);
-  //Serial.println(steps1);
-  //Serial.println(isNegative1);
+   numMoves++;
   runCommand(motor1, (steps1/90 * 400), isNegative1);
   }
   if(Line[*currentPos] == '\0' || *currentPos == 99 ) {
@@ -313,10 +316,24 @@ void startTimer() {
   startTime = millis() / 10.0;
   endTime = millis() / 10.0;
   currentTime = 0;
-  display.showNumberDecEx(currentTime, 0b01000000, true);
+  display1.showNumberDecEx(currentTime, 0b01000000, true);
 }
 
 void endTimer() {
   endTime = (millis() / 10.0) - startTime;
-  display.showNumberDecEx(endTime, 0b01000000, true);
+  display1.showNumberDecEx(endTime, 0b01000000, true);
+  display2.showNumberDecEx(numMoves, false);
+  numMoves = 0;
+}
+
+void clearTimer() {
+  display1.showNumberDecEx(0, 0b01000000, true);
+  display2.showNumberDecEx(0, false);
+  numMoves = 0;
+}
+
+void scrambleCube() {
+  for (int i = 0; i < 20; i++) {
+    rotateSteps(&motorArry[random(6)], 400);
+  }
 }

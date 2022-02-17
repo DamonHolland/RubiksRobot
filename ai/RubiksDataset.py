@@ -1,24 +1,23 @@
 import random
 import sys
 import os.path
-
-from ai.AISolver import AISolver
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import numpy as np
+from mysql import connector
 from model.RubiksCube import RubiksCube
 from RubiksMoves import encode_to_input
-import numpy as np
-import sqlite3
+from ai.AISolver import AISolver
 
 
 class RubiksDatabase:
-    def __init__(self, db_name):
-        self.conn = sqlite3.connect('./SQLite/{}'.format(db_name))
+    def __init__(self):
+        self.conn = connector.connect(host="185.212.71.102", user="u625114106_DamonHolland", passwd="RubiksData123",
+                                      database="u625114106_rubiks_data")
+        print("Connection to MySQL DB successful")
         self.cursor = self.conn.cursor()
         self.cursor.execute(
-            "CREATE TABLE IF NOT EXISTS RubiksData(encoding CHAR(324), scramble INTEGER, PRIMARY KEY (encoding))")
+            "CREATE TABLE IF NOT EXISTS RubiksData(encoding VARCHAR(324), scramble INTEGER, PRIMARY KEY (encoding))")
         self.conn.commit()
-        self.session_size = self.size()
 
     def insert(self, encoding, scramble):
         encoding_string = ""
@@ -27,9 +26,7 @@ class RubiksDatabase:
         try:
             self.cursor.execute("INSERT INTO RubiksData VALUES ('{}', '{}')".format(encoding_string, scramble))
             print("Added new data for scramble {}".format(scramble))
-            self.session_size += 1
-            print("Database Size: {}".format(self.session_size))
-        except sqlite3.IntegrityError:
+        except connector.errors.IntegrityError:
             self.cursor.execute("SELECT scramble FROM RubiksData WHERE encoding = '{}'".format(encoding_string))
             existing_scramble = self.cursor.fetchall()[0][0]
             if existing_scramble > scramble:
@@ -40,7 +37,7 @@ class RubiksDatabase:
     def get_data(self, scramble_max, num_samples):
         results = []
         for i in range(scramble_max):
-            self.cursor.execute("SELECT * FROM RubiksData WHERE scramble = {} ORDER BY RANDOM() LIMIT {}"
+            self.cursor.execute("SELECT * FROM RubiksData WHERE scramble = {} ORDER BY RAND() LIMIT {}"
                                 .format(i + 1, int(num_samples / scramble_max)))
             results += self.cursor.fetchall()
         data_input = []
@@ -61,13 +58,13 @@ class RubiksDatabase:
 
 if __name__ == '__main__':
     cube = RubiksCube()
-    SCRAMBLE_AMOUNT = 9
-    MAX_SOLVE_TIME = 15
-    ai_solver = AISolver("8_Training")
-    database = RubiksDatabase('RubiksData.db')
+    SCRAMBLE_AMOUNT = 10
+    MAX_SOLVE_TIME = 10
+    ai_solver = AISolver("models\9_Model")
+    database = RubiksDatabase()
     while True:
-        scramble_amount = random.randint(1, SCRAMBLE_AMOUNT)
+        scramble_amount = SCRAMBLE_AMOUNT
         cube.reset()
         cube.scramble(scramble_amount)
         solve = ai_solver.solve(cube, MAX_SOLVE_TIME)
-        database.insert(encode_to_input(cube), len(solve) if solve else scramble_amount)
+        database.insert(encode_to_input(cube), min(scramble_amount, len(solve)) if solve else scramble_amount)

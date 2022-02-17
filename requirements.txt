@@ -1,7 +1,10 @@
-numpy==1.19.5
+numpy~=1.22.2
 pygame==2.0.2
 keras==2.6.0
 tensorflow_gpu==2.6.0
 PyOpenGL==3.1.5
 opencv-python~=4.5.3.56
 pyserial~=3.5
+mysql-connector-python~=8.0.28
+tensorflow~=2.8.0
+kociemba~=1.2.1
