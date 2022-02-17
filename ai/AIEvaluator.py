@@ -20,22 +20,20 @@ def cube_from_encoding(encoding):
 
 
 if __name__ == '__main__':
-    SCRAMBLES = 9
-    ai_solver = AISolver("models/9_Training")
+    SCRAMBLES = 10
+    SAMPLE_SIZE = 1000
+    ai_solver = AISolver("models/10_Model")
     db = RubiksDatabase()
     wrong = 0
     total = 0
     cube = RubiksCube()
-    while True:
+    stateData, scrambleData = db.get_data(SCRAMBLES, SAMPLE_SIZE)
+    for i in range(len(scrambleData)):
         total += 1
-        state, scramble = db.get_data(SCRAMBLES, 9)
-        state = state[0]
-        scramble = scramble[0] + 1
-        ai_guess = ai_solver.model.predict_single(state)
-        weighted_sum = 0
-        for i in range(len(ai_guess)):
-            weighted_sum += (1 + i) * float(ai_guess[i])
-        ai_guess = weighted_sum // 1
+        state = stateData[i]
+        scramble = scrambleData[i] + 1
+        ai_guess = list(ai_solver.model.predict_single(state))
+        ai_guess = ai_guess.index(max(ai_guess)) + 1
         if ai_guess != scramble:
             wrong += 1
             print("AI Guessed Wrong {}, Correct is {}".format(ai_guess, scramble))

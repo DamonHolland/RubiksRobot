@@ -8,9 +8,9 @@ from ai.RubiksMoves import MoveDecoder, move_reverse
 import time
 import serial
 
-SCRAMBLE_AMOUNT = 100
-TIME_LIMIT = 10
-SPEED = "90"
+SCRAMBLE_AMOUNT = 10
+TIME_LIMIT = 15
+SPEED = "110"
 COM_PORT = "COM4"
 BAUDRATE = 9600
 
@@ -54,9 +54,9 @@ def sendSerial(serial_message, ser):
 
 
 def PhysicalSolve():
-    ai_solver = AISolver("../ai/models/9_Training")
+    ai_solver = AISolver("../ai/models/10_Model")
     rubiks_cube = RubiksCube()
-    #set up serial
+    # set up serial
     ser = serial.Serial()
     ser.baudrate = BAUDRATE
     ser.port = COM_PORT
@@ -82,17 +82,9 @@ def PhysicalSolve():
     # Use AI To Calculate Solve
     start_t = time.time()
     solve_moves = ai_solver.solve(rubiks_cube, TIME_LIMIT)
-    if not solve_moves:
-        print("AI Failed to Find Solution")
-        solve_moves = scramble_reverse
-    else:
-        solve_moves = [MoveDecoder[i] for i in solve_moves]
-        print("AI solved cube in {} seconds.".format(round(time.time() - start_t, 2)))
+    solve_moves = [MoveDecoder[i] for i in solve_moves]
+    print("AI solved cube in {} seconds.".format(round(time.time() - start_t, 2)))
     print("Solve: {}".format(str(solve_moves)))
-
-    # Delay before solving, so we can see the scramble
-    if time.time() - start_t < 2:
-        time.sleep(2 - (time.time() - start_t))
 
     # Send Solve to Motors
     sendSerial(parseMoves(solve_moves), ser)

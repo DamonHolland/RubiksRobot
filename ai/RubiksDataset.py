@@ -58,12 +58,12 @@ class RubiksDatabase:
 
 if __name__ == '__main__':
     cube = RubiksCube()
-    SCRAMBLE_AMOUNT = 9
-    MAX_SOLVE_TIME = 30
-    ai_solver = AISolver("models\9_Training")
+    SCRAMBLE_AMOUNT = 10
+    MAX_SOLVE_TIME = 10
+    ai_solver = AISolver("models\9_Model")
     database = RubiksDatabase()
     while True:
-        scramble_amount = random.randint(1, SCRAMBLE_AMOUNT)
+        scramble_amount = SCRAMBLE_AMOUNT
         cube.reset()
         cube.scramble(scramble_amount)
         solve = ai_solver.solve(cube, MAX_SOLVE_TIME)
