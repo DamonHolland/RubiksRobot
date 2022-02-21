@@ -50,7 +50,10 @@ def parseMoves(move_array):
 
 def sendSerial(serial_message, ser):
     print("Serial Input: {}".format(serial_message))
-    ser.write(serial_message.encode())
+    serial_encoded = (serial_message + "\n").encode()
+    for byte in serial_encoded:
+        ser.write(byte)
+        time.sleep(0.01)
 
 
 def PhysicalSolve():
