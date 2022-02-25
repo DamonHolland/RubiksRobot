@@ -8,3 +8,4 @@ pyserial~=3.5
 mysql-connector-python~=8.0.28
 tensorflow~=2.8.0
 kociemba~=1.2.1
+opencv-python

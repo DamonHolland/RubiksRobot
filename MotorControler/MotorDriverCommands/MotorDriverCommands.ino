@@ -33,7 +33,7 @@ const int UP_MOTOR = 2;
 const int DOWN_MOTOR = 3;
 const int FRONT_MOTOR = 4;
 const int BACK_MOTOR = 5;
-int MAX_COMMAND_SIZE = 100;
+int MAX_COMMAND_SIZE = 500;
 int motorDelay = 250;
 unsigned long startTime;
 unsigned long currentTime;
@@ -70,7 +70,7 @@ typedef struct {
 
 motor motorArry[6];
 String command;
-char buff[100];
+char buff[500];
 
 void setup() {
    // put your setup code here, to run once:
@@ -94,16 +94,26 @@ void setup() {
 }
 
 void loop() {
-  if(Serial.available()){
+  if(Serial.available() > 0){
     clearTimer();
     display2.setSegments(blank);
     display2.setSegments(wait);
           int currentPos = 0;
-          while(!Serial.available()) {
+          int hol = 0;
+          hol = Serial.read();
+          while(hol != 10 && currentPos < MAX_COMMAND_SIZE) {
+            if (Serial.available() > 0) {
+              if (hol != -1) {
+                buff[currentPos] = (char)hol;
+                Serial.println((char)hol);
+                currentPos++;
+              }
+              hol = Serial.read();
+            }
           }
-          command = Serial.readStringUntil('\n');
-          Serial.println(command);
-          command.toCharArray(buff, MAX_COMMAND_SIZE);
+          Serial.println("out");
+          currentPos = 0;
+          
           display2.setSegments(blank);
           display2.setSegments(red);
           while(digitalRead(bttn1) == LOW){};
@@ -113,6 +123,7 @@ void loop() {
           endTimer();
           memset(buff, '\0', MAX_COMMAND_SIZE);
           command = "";
+          delay(10);
    }
    else if (digitalRead(bttn2) == HIGH) {
     scrambleCube();
@@ -238,7 +249,7 @@ bool parseCommandFromLine(const char* Line, int* currentPos) {
     }
   }
   steps1 = atoi(&Line[*currentPos]);
-  while(isDigit(Line[*currentPos]) && *currentPos < 100) {
+  while(isDigit(Line[*currentPos]) && *currentPos < MAX_COMMAND_SIZE) {
     *currentPos += 1;
   }
   if (isAlpha(Line[*currentPos])) {
@@ -251,7 +262,7 @@ bool parseCommandFromLine(const char* Line, int* currentPos) {
     }
   }
   steps2 = atoi(&Line[*currentPos]);
-  while(isDigit(Line[*currentPos]) && *currentPos < 100) {
+  while(isDigit(Line[*currentPos]) && *currentPos < MAX_COMMAND_SIZE) {
     *currentPos += 1;
   }
   //do both
@@ -265,7 +276,7 @@ bool parseCommandFromLine(const char* Line, int* currentPos) {
    numMoves++;
   runCommand(motor1, (steps1/90 * 400), isNegative1);
   }
-  if(Line[*currentPos] == '\0' || *currentPos == 99 ) {
+  if(Line[*currentPos] == '\0' || *currentPos == MAX_COMMAND_SIZE - 1 ) {
     returnVal = false;
   }
   

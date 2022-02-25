@@ -8,9 +8,9 @@ from ai.RubiksMoves import MoveDecoder, move_reverse
 import time
 import serial
 
-SCRAMBLE_AMOUNT = 10
+SCRAMBLE_AMOUNT = 20
 TIME_LIMIT = 15
-SPEED = "110"
+SPEED = "100"
 COM_PORT = "COM4"
 BAUDRATE = 9600
 
@@ -22,7 +22,7 @@ PARALLEL_MOVES = {"U": "D",
                   "R": "L"}
 
 
-def parseMoves(move_array):
+def parseMovesSolve(move_array):
     # Convert to degrees
     for i in range(len(move_array)):
         if len(move_array[i]) > 1:
@@ -47,10 +47,32 @@ def parseMoves(move_array):
         i += 1
     return SPEED + ' ' + ' '.join(move_array)
 
+def parseMovesScramble(move_array):
+    # Convert to degrees
+    for i in range(len(move_array)):
+        if len(move_array[i]) > 1:
+            move_array[i] = move_array[i][0] + "-90"
+        else:
+            move_array[i] = move_array[i] + "90"
+    # Combine Consecutive Moves
+    i = 1
+    while i < len(move_array):
+        if move_array[i][0] == move_array[i - 1][0]:
+            degree1 = int(move_array[i][1:])
+            degree2 = int(move_array[i - 1][1:])
+            move_array[i - 1] = move_array[i - 1][0] + str(degree1 + degree2)
+            move_array.pop(i)
+        i += 1
+    return SPEED + ' ' + ' '.join(move_array)
+
+
 
 def sendSerial(serial_message, ser):
     print("Serial Input: {}".format(serial_message))
-    ser.write(serial_message.encode())
+    serial_message += "\n"
+    for char in serial_message:
+        ser.write(char.encode('utf-8'))
+        time.sleep(.00001)
 
 
 def PhysicalSolve():
@@ -77,7 +99,7 @@ def PhysicalSolve():
     print("Scramble: {}".format(str(scramble)))
 
     # Send Scramble to Motors
-    sendSerial(parseMoves(scramble), ser)
+    sendSerial(parseMovesScramble(scramble), ser)
 
     # Use AI To Calculate Solve
     start_t = time.time()
@@ -87,7 +109,7 @@ def PhysicalSolve():
     print("Solve: {}".format(str(solve_moves)))
 
     # Send Solve to Motors
-    sendSerial(parseMoves(solve_moves), ser)
+    sendSerial(parseMovesSolve(solve_moves), ser)
     
     time.sleep(7)
     ser.close()
