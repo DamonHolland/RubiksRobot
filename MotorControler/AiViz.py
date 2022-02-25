@@ -1,5 +1,6 @@
 import sys
 import os
+import ComputerVisionStatic
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from ai.AISolver import AISolver
@@ -90,13 +91,7 @@ def PhysicalSolve():
         ser.close()
         return
     # Scan Cube for AI to solve - For Now we just scramble ourselves.
-    print("Scrambled cube {} moves.".format(SCRAMBLE_AMOUNT))
-    scramble = rubiks_cube.scramble(SCRAMBLE_AMOUNT)
-    scramble_reverse = [move_reverse(i) for i in scramble]
-    scramble_reverse.reverse()
-    scramble_reverse = [MoveDecoder[i] for i in scramble_reverse]
-    scramble = [MoveDecoder[i] for i in scramble]
-    print("Scramble: {}".format(str(scramble)))
+    scramble = ComputerVisionStatic.scanCube()
 
     # Send Scramble to Motors
     sendSerial(parseMovesScramble(scramble), ser)
