@@ -21,6 +21,8 @@ colorsBot = [[(403, 265), (352, 301), (330, 315), (408, 234), (362, 262), (331, 
           [(296, 312), (270, 297), (229, 259), (295, 278), (261, 248), (228, 221), (298, 245), (260, 214), (232, 192)],
           [(314, 207), (279, 184), (248, 159), (358, 191), (320, 159), (280, 137), (389, 170), (366, 148), (338, 127)]]
 
+onehotencoding = []
+
 
 def drawCircle (frame, pixelArray):
     for row in pixelArray:
@@ -33,8 +35,7 @@ def drawCircle (frame, pixelArray):
 def defineColors (frame, pixelArray, retVal):
     for row in pixelArray:
         for pixel in row:
-            print("HELLOOOO ", ComputerVisionRubiksRGB.RGBUint8.identifyBGR(frame, pixel[0], pixel[1]))
-            retVal.append(str(ComputerVisionRubiksRGB.RGBUint8.identifyBGR(frame, pixel[0], pixel[1])))
+            retVal.append(ComputerVisionRubiksRGB.RGBUint8.identifyBGR(frame, pixel[0], pixel[1]))
 
     return retVal
 
@@ -50,10 +51,8 @@ if __name__ == '__main__':
         cv.imshow('Rubiks Cube Bot', frameBot)
 
         if cv.waitKey(1) == ord('q'):
-            onehotencoding = []
-
-            onehotencoding = (frameTop, colorsTop, onehotencoding)
-            onehotencoding = (frameBot, colorsBot, onehotencoding)
+            defineColors(frameTop, colorsTop, onehotencoding)
+            defineColors(frameBot, colorsBot, onehotencoding)
 
             print(onehotencoding)
             break
