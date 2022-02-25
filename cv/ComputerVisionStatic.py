@@ -56,9 +56,8 @@ class ComputerVisionStatic:
                 defineColors(frameTop, colorsTop, onehotencoding)
                 defineColors(frameBot, colorsBot, onehotencoding)
 
-                print(onehotencoding)
-                break
+                capTop.release()
+                capBot.release()
+                cv.destroyAllWindows()
 
-        capTop.release()
-        capBot.release()
-        cv.destroyAllWindows()
+                return onehotencoding
