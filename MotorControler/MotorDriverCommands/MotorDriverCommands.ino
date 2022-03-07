@@ -1,4 +1,5 @@
 #include <TM1637Display.h>
+#include <Adafruit_NeoPixel.h>
 #define dirPinRight 45
 #define stepPinRight 43
 #define enPinRight 47
@@ -23,6 +24,10 @@
 #define DIO2 35
 #define bttn1 39
 #define bttn2 41
+#define lightPin 37
+#define NUMPIXELS 6
+
+Adafruit_NeoPixel lights = Adafruit_NeoPixel(NUMPIXELS, lightPin, NEO_GRB + NEO_KHZ800);
 
 const int MAX_NUM_STEPS = 1600;
 const int DELAY_SPEED = 500;
@@ -69,7 +74,6 @@ typedef struct {
 } motor;
 
 motor motorArry[6];
-String command;
 char buff[500];
 
 void setup() {
@@ -91,43 +95,53 @@ void setup() {
   clearTimer();
   delay(1000);
   startTimer();
+  lights.begin();
 }
 
 void loop() {
   if(Serial.available() > 0){
+    int currentPos = 0;
+    int hol = 0;
+    hol = Serial.read();
+    while(hol != 10 && currentPos < MAX_COMMAND_SIZE) {
+      if (Serial.available() > 0) {
+        if (hol != -1) {
+          buff[currentPos] = (char)hol;
+          currentPos++;
+        }
+      hol = Serial.read();
+    }
+  }
+
+  if (strcmp(buff, "lights on") == 0) {
+    turnLightsOn();
+    memset(buff, '\0', MAX_COMMAND_SIZE);
+    Serial.println("Lights ON");
+  }
+  else if (strcmp(buff, "lights off") == 0) {
+    turnLightsOff();
+    memset(buff, '\0', MAX_COMMAND_SIZE);
+    Serial.println("Lights OFF");
+  }
+  else {
     clearTimer();
     display2.setSegments(blank);
     display2.setSegments(wait);
-          int currentPos = 0;
-          int hol = 0;
-          hol = Serial.read();
-          while(hol != 10 && currentPos < MAX_COMMAND_SIZE) {
-            if (Serial.available() > 0) {
-              if (hol != -1) {
-                buff[currentPos] = (char)hol;
-                Serial.println((char)hol);
-                currentPos++;
-              }
-              hol = Serial.read();
-            }
-          }
-          Serial.println("out");
-          currentPos = 0;
+    currentPos = 0;
+    display2.setSegments(blank);
+    display2.setSegments(red);
+    while(digitalRead(bttn1) == LOW){};
+      startTimer();
+      while(parseCommandFromLine(buff, &currentPos)) {
+    }
+    endTimer();
+    memset(buff, '\0', MAX_COMMAND_SIZE);
+  }
           
-          display2.setSegments(blank);
-          display2.setSegments(red);
-          while(digitalRead(bttn1) == LOW){};
-          startTimer();
-          while(parseCommandFromLine(buff, &currentPos)) {
-          }
-          endTimer();
-          memset(buff, '\0', MAX_COMMAND_SIZE);
-          command = "";
-          delay(10);
-   }
-   else if (digitalRead(bttn2) == HIGH) {
+  }
+  else if (digitalRead(bttn2) == HIGH) {
     scrambleCube();
-   }
+  }
 }
 
 void setUpMotor (motor* motorPtr, int dirPin, int stepPin, int enPin, int maxNumSteps, int give) {
@@ -347,4 +361,21 @@ void scrambleCube() {
   for (int i = 0; i < 20; i++) {
     rotateSteps(&motorArry[random(6)], 400);
   }
+}
+
+void turnLightsOn() {
+  for(int i=0;i<NUMPIXELS;i++){
+
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+    lights.setPixelColor(i,255, 255, 255, 127); // Moderately bright green color.
+    lights.setBrightness(12);
+    lights.show(); // This sends the updated pixel color to the hardware.
+    delay(500);
+
+  }
+}
+
+void turnLightsOff() {
+  lights.clear();
+  lights.show();
 }
