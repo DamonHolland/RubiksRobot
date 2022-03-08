@@ -1,6 +1,6 @@
 import sys
 import os
-import ComputerVisionStatic
+from cv.ComputerVisionStatic import ComputerVisionStatic
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from ai.AISolver import AISolver
@@ -8,11 +8,12 @@ from model.RubiksCube import RubiksCube
 from ai.RubiksMoves import MoveDecoder, move_reverse
 import time
 import serial
+from visuals.RubiksVisualizer import RubiksVisualizer
 
 SCRAMBLE_AMOUNT = 20
 TIME_LIMIT = 15
 SPEED = "100"
-COM_PORT = "COM4"
+COM_PORT = "COM3"
 BAUDRATE = 9600
 
 PARALLEL_MOVES = {"U": "D",
@@ -48,6 +49,7 @@ def parseMovesSolve(move_array):
         i += 1
     return SPEED + ' ' + ' '.join(move_array)
 
+
 def parseMovesScramble(move_array):
     # Convert to degrees
     for i in range(len(move_array)):
@@ -65,7 +67,6 @@ def parseMovesScramble(move_array):
             move_array.pop(i)
         i += 1
     return SPEED + ' ' + ' '.join(move_array)
-
 
 
 def sendSerial(serial_message, ser):
@@ -91,7 +92,14 @@ def PhysicalSolve():
         ser.close()
         return
     # Scan Cube for AI to solve - For Now we just scramble ourselves.
-    scramble = ComputerVisionStatic.scanCube()
+    sendSerial("lights on", ser)
+    cv_static = ComputerVisionStatic()
+    orientation = cv_static.scanCube()
+    rubiks_cube.faces = orientation
+    visualizer = RubiksVisualizer(rubiks_cube)
+
+    while True:
+        time.sleep(1)
 
     # Send Scramble to Motors
     sendSerial(parseMovesScramble(scramble), ser)
@@ -105,9 +113,10 @@ def PhysicalSolve():
 
     # Send Solve to Motors
     sendSerial(parseMovesSolve(solve_moves), ser)
-    
+
     time.sleep(7)
     ser.close()
+
 
 if __name__ == '__main__':
     PhysicalSolve()

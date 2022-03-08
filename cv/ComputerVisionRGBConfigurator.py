@@ -21,7 +21,7 @@ def mouseRGB(event,x,y,flags,params):
 cv2.namedWindow('mouseRGB')
 cv2.setMouseCallback('mouseRGB', mouseRGB)
 
-capture = cv2.VideoCapture(1)
+capture = cv2.VideoCapture(0)
 
 
 while(True):

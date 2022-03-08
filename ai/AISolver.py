@@ -34,18 +34,12 @@ class AISolver:
         heap = [Node([], cube, self.get_categorical_prediction)]
         heapq.heapify(heap)
         start_time = time.time()
-        v = 1
         while time.time() - start_time <= time_limit:
             first: Node = heapq.heappop(heap)
-            # print("Starting with node: {}, Depth: {}".format(str(first.value), str(first.depth)))
             for new in [Node(first.moves + [m], cube, self.get_categorical_prediction) for m in MoveDecoder.keys()]:
-                # print("Adding node: {}, Depth: {}".format(str(new.value), str(new.depth)))
                 if new.value == -sys.maxsize:
-                    print("Visited Nodes: {}".format(str(v)))
                     return new.moves
                 heapq.heappush(heap, new)
-                v += 1
-        print("Visited Nodes: {}".format(str(v)))
         print("AI did not find solution. Kociemba algorithm was used as backup.")
         return KociembaSolver().solve(cube)
 
@@ -56,7 +50,7 @@ class AISolver:
 
 if __name__ == '__main__':
     SCRAMBLE_AMOUNT = 4
-    TIME_LIMIT = 1
+    TIME_LIMIT = 10
     ai_solver = AISolver("models/10_Model")
     rubiks_cube = RubiksCube()
     visualizer = RubiksVisualizer(rubiks_cube)
