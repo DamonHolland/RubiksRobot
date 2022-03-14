@@ -34,6 +34,7 @@ class KociembaSolver:
 
     def solve(self, cube):
         cube_string = self.kociemba_string(cube)
+        print(cube_string)
         solve = kociemba.solve(cube_string).split(' ')
         for i, item in list(enumerate(solve))[::-1]:
             if item == 'U2':

@@ -12,7 +12,7 @@ from visuals.RubiksVisualizer import RubiksVisualizer
 
 SCRAMBLE_AMOUNT = 20
 TIME_LIMIT = 15
-SPEED = "100"
+SPEED = "120"
 COM_PORT = "COM3"
 BAUDRATE = 9600
 
@@ -97,12 +97,6 @@ def PhysicalSolve():
     orientation = cv_static.scanCube()
     rubiks_cube.faces = orientation
     visualizer = RubiksVisualizer(rubiks_cube)
-
-    while True:
-        time.sleep(1)
-
-    # Send Scramble to Motors
-    sendSerial(parseMovesScramble(scramble), ser)
 
     # Use AI To Calculate Solve
     start_t = time.time()

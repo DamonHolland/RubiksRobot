@@ -9,9 +9,9 @@ import time
 import serial
 
 SCRAMBLE_AMOUNT = 20
-TIME_LIMIT = 15
-SPEED = "100"
-COM_PORT = "COM4"
+TIME_LIMIT = 5
+SPEED = "125"
+COM_PORT = "COM3"
 BAUDRATE = 9600
 
 PARALLEL_MOVES = {"U": "D",
@@ -100,6 +100,8 @@ def PhysicalSolve():
 
     # Send Scramble to Motors
     sendSerial(parseMovesScramble(scramble), ser)
+
+    time.sleep(5)
 
     # Use AI To Calculate Solve
     start_t = time.time()

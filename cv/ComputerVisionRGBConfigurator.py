@@ -13,15 +13,15 @@ def mouseRGB(event,x,y,flags,params):
         # print("Green: ",colorsG)
         # print("Blue: ",colorsB)
         # print("BRG Format: ",colors)
-        print("Coordinates of pixel: X: ",x,"Y: ",y)
+        print("(", x,",",y,"),", end='')
 
-        print(ComputerVisionRubiksRGB.RGBUint8.identifyBGR(frame, x, y))
+        # print(ComputerVisionRubiksRGB.RGBUint8.identifyHue(frame, x, y))
 
 
 cv2.namedWindow('mouseRGB')
 cv2.setMouseCallback('mouseRGB', mouseRGB)
 
-capture = cv2.VideoCapture(0)
+capture = cv2.VideoCapture(1)
 
 
 while(True):
