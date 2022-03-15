@@ -31,21 +31,19 @@ class RubiksCube:
                       ORANGE: 'O',
                       YELLOW: 'Y'}
 
-    def __init__(self):
+    def __init__(self, faces=None):
         self.verbose = False
         self.faces = []
         self.last_move = -1
         self.last_move2 = -1
-        self.reset()
+        if not faces: self.faces = SOLVED_CUBE
+        else: self.faces = faces
 
     def reset(self):
         self.verbose = False
-        self.faces = []
+        self.faces = SOLVED_CUBE
         self.last_move = -1
         self.last_move2 = -1
-        for face in self.CUBE_FACES:
-            for i in range(self.PIECE_FACES_PER_SIDE):
-                self.faces.append(face)
 
     def as_string(self):
         string = ""
@@ -81,8 +79,7 @@ class RubiksCube:
         return scramble_moves
 
     def rotate_white(self, cc=False):
-        if self.verbose:
-            print("Rotating White {}".format("CounterClockwise (U')" if cc else "Clockwise (U)"))
+        if self.verbose: print("Rotating White {}".format("CounterClockwise (U')" if cc else "Clockwise (U)"))
         self._rotate_swap(1, 5, 7, 3, cc)
         self._rotate_swap(0, 2, 8, 6, cc)
         self._rotate_swap(9, 36, 27, 18, cc)
@@ -90,8 +87,7 @@ class RubiksCube:
         self._rotate_swap(11, 38, 29, 20, cc)
 
     def rotate_green(self, cc=False):
-        if self.verbose:
-            print("Rotating Green {}".format("CounterClockwise (F')" if cc else "Clockwise (F)"))
+        if self.verbose: print("Rotating Green {}".format("CounterClockwise (F')" if cc else "Clockwise (F)"))
         self._rotate_swap(10, 14, 16, 12, cc)
         self._rotate_swap(9, 11, 17, 15, cc)
         self._rotate_swap(8, 24, 47, 38, cc)
@@ -99,8 +95,7 @@ class RubiksCube:
         self._rotate_swap(6, 18, 53, 44, cc)
 
     def rotate_red(self, cc=False):
-        if self.verbose:
-            print("Rotating Red {}".format("CounterClockwise (R')" if cc else "Clockwise (R)"))
+        if self.verbose: print("Rotating Red {}".format("CounterClockwise (R')" if cc else "Clockwise (R)"))
         self._rotate_swap(19, 23, 25, 21, cc)
         self._rotate_swap(18, 20, 26, 24, cc)
         self._rotate_swap(2, 33, 53, 11, cc)
@@ -108,8 +103,7 @@ class RubiksCube:
         self._rotate_swap(8, 27, 51, 17, cc)
 
     def rotate_blue(self, cc=False):
-        if self.verbose:
-            print("Rotating Blue {}".format("CounterClockwise (B')" if cc else "Clockwise (B)"))
+        if self.verbose: print("Rotating Blue {}".format("CounterClockwise (B')" if cc else "Clockwise (B)"))
         self._rotate_swap(28, 32, 34, 30, cc)
         self._rotate_swap(27, 29, 35, 33, cc)
         self._rotate_swap(0, 42, 51, 20, cc)
@@ -117,8 +111,7 @@ class RubiksCube:
         self._rotate_swap(2, 36, 45, 26, cc)
 
     def rotate_orange(self, cc=False):
-        if self.verbose:
-            print("Rotating Orange {}".format("CounterClockwise (L')" if cc else "Clockwise (L)"))
+        if self.verbose: print("Rotating Orange {}".format("CounterClockwise (L')" if cc else "Clockwise (L)"))
         self._rotate_swap(37, 41, 43, 39, cc)
         self._rotate_swap(36, 38, 44, 42, cc)
         self._rotate_swap(6, 15, 45, 29, cc)
@@ -126,8 +119,7 @@ class RubiksCube:
         self._rotate_swap(0, 9, 47, 35, cc)
 
     def rotate_yellow(self, cc=False):
-        if self.verbose:
-            print("Rotating Yellow {}".format("CounterClockwise (D')" if cc else "Clockwise (D)"))
+        if self.verbose: print("Rotating Yellow {}".format("CounterClockwise (D')" if cc else "Clockwise (D)"))
         self._rotate_swap(46, 50, 52, 48, cc)
         self._rotate_swap(45, 47, 53, 51, cc)
         self._rotate_swap(17, 26, 35, 44, cc)

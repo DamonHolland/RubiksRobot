@@ -1,4 +1,3 @@
-import time
 import pygame
 import numpy as np
 from threading import Thread
@@ -128,12 +127,3 @@ class RubiksVisualizer:
             for vertex in edge:
                 glVertex3fv(vertices[vertex])
         glEnd()
-
-
-if __name__ == '__main__':
-    rubiks_cube = RubiksCube()
-    rubiks_cube.enable_logging()
-    RubiksVisualizer(rubiks_cube)
-    for i in range(30):
-        time.sleep(0.5)
-        rubiks_cube.scramble(1)

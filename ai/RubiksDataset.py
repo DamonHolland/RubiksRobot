@@ -1,6 +1,6 @@
-import random
 import sys
 import os.path
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import numpy as np
 from mysql import connector

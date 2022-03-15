@@ -2,15 +2,15 @@ import sys
 import os.path
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from visuals.RubiksVisualizer import RubiksVisualizer
-from ai.RubiksMoves import MoveDecoder, perform_move, encode_to_input
-from model.RubiksCube import RubiksCube
-import tensorflow as tf
 import copy
 import time
 import heapq
+import tensorflow as tf
 from ai.LiteModel import LiteModel
-from ai.KociembaSolver import KociembaSolver
+from ai.KociembaSolver import solve_kociemba
+from ai.RubiksMoves import MoveDecoder, perform_move, encode_to_input
+from model.RubiksVisualizer import RubiksVisualizer
+from model.RubiksCube import RubiksCube
 
 
 class Node:
@@ -23,6 +23,7 @@ class Node:
         self.value = -sys.maxsize if temp_cube.is_solved() else predictor(temp_cube)
 
     def __lt__(self, other):
+        # Less than operator overload
         return self.value + self.depth < other.value + other.depth
 
 
@@ -41,7 +42,7 @@ class AISolver:
                     return new.moves
                 heapq.heappush(heap, new)
         print("AI did not find solution. Kociemba algorithm was used as backup.")
-        return KociembaSolver().solve(cube)
+        return solve_kociemba(cube)
 
     def get_categorical_prediction(self, cube) -> int:
         predictions = list(self.model.predict_single(encode_to_input(cube)))

@@ -1,6 +1,5 @@
 import sys
 import os.path
-import time
 
 from model.RubiksCube import RubiksCube
 

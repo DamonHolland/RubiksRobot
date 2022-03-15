@@ -9,10 +9,6 @@ import numpy as np
 class LiteModel:
 
     @classmethod
-    def from_file(cls, model_path):
-        return LiteModel(tf.lite.Interpreter(model_path=model_path))
-
-    @classmethod
     def from_keras_model(cls, model):
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
         lite_model = converter.convert()
@@ -41,7 +37,6 @@ class LiteModel:
         return out
 
     def predict_single(self, inp):
-        """ Like predict(), but only for a single record. The input data can be a Python list. """
         inp = np.array([inp], dtype=self.input_dtype)
         self.interpreter.set_tensor(self.input_index, inp)
         self.interpreter.invoke()

@@ -40,7 +40,6 @@ if __name__ == '__main__':
 
     model = create_model(NUM_SCRAMBLES)
     logging.getLogger('tensorflow').disabled = True
-    print("\nThere are approximately {} permutations for {} scrambles.\n".format(12 * pow(11, NUM_SCRAMBLES - 1), NUM_SCRAMBLES))
 
     start_time = time.time()
     test_loss, test_acc = 100, 0

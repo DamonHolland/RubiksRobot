@@ -1,36 +1,30 @@
 import sys
 import os
-from cv.ComputerVisionStatic import ComputerVisionStatic
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from ai.AISolver import AISolver
-from model.RubiksCube import RubiksCube
-from ai.RubiksMoves import MoveDecoder, move_reverse
 import time
 import serial
-from visuals.RubiksVisualizer import RubiksVisualizer
+from ai.AISolver import AISolver
+from ai.RubiksMoves import MoveDecoder
+from model.RubiksCube import RubiksCube
+from model.RubiksVisualizer import RubiksVisualizer
+from cv.ComputerVisionStatic import ComputerVisionStatic
 
 SCRAMBLE_AMOUNT = 20
 TIME_LIMIT = 15
 SPEED = "120"
 COM_PORT = "COM3"
 BAUDRATE = 9600
+SERIAL_DELAY = 7
 
-PARALLEL_MOVES = {"U": "D",
-                  "D": "U",
-                  "F": "B",
-                  "B": "F",
-                  "L": "R",
-                  "R": "L"}
+PARALLEL_MOVES = {"U": "D", "D": "U", "F": "B", "B": "F", "L": "R", "R": "L"}
 
 
-def parseMovesSolve(move_array):
+def parse_moves_simplify(move_array):
     # Convert to degrees
     for i in range(len(move_array)):
-        if len(move_array[i]) > 1:
-            move_array[i] = move_array[i][0] + "-90"
-        else:
-            move_array[i] = move_array[i] + "90"
+        if len(move_array[i]) > 1:  move_array[i] = move_array[i][0] + "-90"
+        else: move_array[i] = move_array[i] + "90"
     # Combine Consecutive Moves
     i = 1
     while i < len(move_array):
@@ -50,7 +44,7 @@ def parseMovesSolve(move_array):
     return SPEED + ' ' + ' '.join(move_array)
 
 
-def parseMovesScramble(move_array):
+def parse_moves_strict(move_array):
     # Convert to degrees
     for i in range(len(move_array)):
         if len(move_array[i]) > 1:
@@ -69,7 +63,7 @@ def parseMovesScramble(move_array):
     return SPEED + ' ' + ' '.join(move_array)
 
 
-def sendSerial(serial_message, ser):
+def send_serial(serial_message, ser):
     print("Serial Input: {}".format(serial_message))
     serial_message += "\n"
     for char in serial_message:
@@ -77,40 +71,36 @@ def sendSerial(serial_message, ser):
         time.sleep(.00001)
 
 
-def PhysicalSolve():
-    ai_solver = AISolver("../ai/models/10_Model")
-    rubiks_cube = RubiksCube()
-    # set up serial
+def robot_control():
+    # Set up serial
     ser = serial.Serial()
     ser.baudrate = BAUDRATE
     ser.port = COM_PORT
     try:
         ser.open()
-        time.sleep(7)
+        time.sleep(SERIAL_DELAY)
     except serial.serialutil.SerialException:
         print("Failed to open Serial")
         ser.close()
         return
-    # Scan Cube for AI to solve - For Now we just scramble ourselves.
-    sendSerial("lights on", ser)
+
+    # Scan Cube for AI to solve
+    send_serial("lights on", ser)
     cv_static = ComputerVisionStatic()
-    orientation = cv_static.scanCube()
-    rubiks_cube.faces = orientation
-    visualizer = RubiksVisualizer(rubiks_cube)
+    rubiks_cube = RubiksCube(cv_static.scanCube())
+    _visualizer = RubiksVisualizer(rubiks_cube)
 
     # Use AI To Calculate Solve
-    start_t = time.time()
+    ai_solver = AISolver("../ai/models/10_Model")
     solve_moves = ai_solver.solve(rubiks_cube, TIME_LIMIT)
     solve_moves = [MoveDecoder[i] for i in solve_moves]
-    print("AI solved cube in {} seconds.".format(round(time.time() - start_t, 2)))
-    print("Solve: {}".format(str(solve_moves)))
 
     # Send Solve to Motors
-    sendSerial(parseMovesSolve(solve_moves), ser)
+    send_serial(parse_moves_simplify(solve_moves), ser)
 
-    time.sleep(7)
+    time.sleep(SERIAL_DELAY)
     ser.close()
 
 
 if __name__ == '__main__':
-    PhysicalSolve()
+    robot_control()
