@@ -10,17 +10,11 @@ class ComputerVisionStatic:
         self.frameWidth = 720
         self.frameHeight = 720
 
-        self.camTop = 0;
-        self.camBot = 1;
+        self.camTop = 0
+        self.camBot = 1
 
         self.capTop = None
         self.capBot = None
-
-        self.capTop.set(3, self.frameWidth)
-        self.capTop.set(4, self.frameHeight)
-
-        self.capBot.set(3, self.frameWidth)
-        self.capBot.set(4, self.frameHeight)
 
         self.retBot = None
         self.frameBot = None
@@ -51,6 +45,12 @@ class ComputerVisionStatic:
     def initCameras(self):
         self.capTop = opencv.VideoCapture(self.camTop)
         self.capBot = opencv.VideoCapture(self.camBot)
+
+        self.capTop.set(3, self.frameWidth)
+        self.capTop.set(4, self.frameHeight)
+
+        self.capBot.set(3, self.frameWidth)
+        self.capBot.set(4, self.frameHeight)
 
     def switchCameras(self):
         temp = self.camBot
