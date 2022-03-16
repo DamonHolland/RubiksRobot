@@ -10,8 +10,11 @@ class ComputerVisionStatic:
         self.frameWidth = 720
         self.frameHeight = 720
 
-        self.capTop = opencv.VideoCapture(1)
-        self.capBot = opencv.VideoCapture(0)
+        self.camTop = 0;
+        self.camBot = 1;
+
+        self.capTop = None
+        self.capBot = None
 
         self.capTop.set(3, self.frameWidth)
         self.capTop.set(4, self.frameHeight)
@@ -44,6 +47,24 @@ class ComputerVisionStatic:
         ]
 
         self.onehotencoding = []
+
+    def initCameras(self):
+        self.capTop = opencv.VideoCapture(self.camTop)
+        self.capBot = opencv.VideoCapture(self.camBot)
+
+    def switchCameras(self):
+        temp = self.camBot
+        self.camBot = self.camTop
+        self.camTop = temp;
+        self.initCameras()
+
+    def switchCamTop(self, num):
+        self.camTop = num
+        self.initCameras()
+
+    def switchCamBot(self, num):
+        self.camBot = num
+        self.initCameras()
 
     def drawCircle(self, frame, pixelArray):
         for row in pixelArray:
