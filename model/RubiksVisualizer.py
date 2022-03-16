@@ -40,13 +40,11 @@ class RubiksVisualizer:
         prev_mouse_pos = [0, 0]
         while running:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
+                if event.type == pygame.QUIT: running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     drag = True
                     prev_mouse_pos = pygame.mouse.get_pos()
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    drag = False
+                elif event.type == pygame.MOUSEBUTTONUP: drag = False
             if drag:
                 self.y_angle += (pygame.mouse.get_pos()[0] - prev_mouse_pos[0]) * self.ROTATE_SPEED
                 self.x_angle += (pygame.mouse.get_pos()[1] - prev_mouse_pos[1]) * self.ROTATE_SPEED
