@@ -55,7 +55,7 @@ class ComputerVisionStatic:
     def switchCameras(self):
         temp = self.camBot
         self.camBot = self.camTop
-        self.camTop = temp;
+        self.camTop = temp
         self.initCameras()
 
     def switchCamTop(self, num):
