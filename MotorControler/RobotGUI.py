@@ -2,6 +2,12 @@ import tkinter as tk
 import serial
 import serial.tools.list_ports
 import cv2 as opencv
+import MotorControler.RubiksSerialTools as SerTool
+from ai.AISolver import AISolver
+from ai.RubiksMoves import MoveDecoder, perform_move
+from cv.ComputerVisionStatic import ComputerVisionStatic
+from model.RubiksCube import RubiksCube
+from model.RubiksVisualizer import RubiksVisualizer
 
 
 def get_available_com_ports():
@@ -20,71 +26,98 @@ def get_available_cams():
         return available_cams
 
 
-def solve_action():
-    print("Solve")
+class RobotGUI:
+    def __init__(self):
+        # Create Rubiks Solving Components
+        self.ser = serial.Serial()
+        self.ser.baudrate = 9600
+        self.cube = RubiksCube()
+        self.visualizer = RubiksVisualizer(self.cube)
+        self.ai_solver = AISolver("../ai/models/10_Model")
 
+        # Create GUI Root
+        self.root = tk.Tk()
+        self.root.title('Rubiks Robot GUI')
+        self.root.geometry("400x260")
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+        self.root.resizable(False, False)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
-def scramble_action():
-    print("Scramble")
+        # Create Field Labels
+        self.com_port_label = tk.Label(self.root, text="COM Port: ")
+        self.cam_top_label = tk.Label(self.root, text="Top Camera: ")
+        self.cam_bottom_label = tk.Label(self.root, text="Bottom Camera: ")
+        self.light_level_label = tk.Label(self.root, text="Light Level: ")
+        self.motor_speed_level = tk.Label(self.root, text="Motor Speed: ")
 
+        # Create GUI Components
+        self.com_option_selected = tk.StringVar()  # COM Port
+        self.com_option_selected.trace("w", self.on_serial_change)
+        self.com_option_selected.set(get_available_com_ports()[0])
+        self.com_menu = tk.OptionMenu(self.root, self.com_option_selected, *get_available_com_ports())
+        self.top_cam_selected = tk.StringVar()  # Camera top
+        self.top_cam_selected.set(get_available_cams()[0])
+        self.top_cam_menu = tk.OptionMenu(self.root, self.top_cam_selected, *get_available_cams())
+        self.bottom_cam_selected = tk.StringVar()  # Camera bottom
+        self.bottom_cam_selected.set(get_available_cams()[0])
+        self.bottom_cam_menu = tk.OptionMenu(self.root, self.bottom_cam_selected, *get_available_cams())  # Light Level
+        self.light_level_slider = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL, length=200)
+        self.light_level_slider.bind("<ButtonRelease-1>", self.on_light_change)
+        self.motor_speed_slider = tk.Scale(self.root, from_=200, to=80, orient=tk.HORIZONTAL, length=200)  # Motor Level
+        self.solve_button = tk.Button(self.root, text="Solve", command=self.on_solve, width=15, height=4)
+        self.scramble_button = tk.Button(self.root, text="Scramble", command=self.on_scramble, width=15, height=4)
 
-def run_gui():
-    # Create GUI Root
-    root = tk.Tk()
-    root.title('Rubiks Robot GUI')
-    root.geometry("400x260")
-    root.columnconfigure(0, weight=1)
-    root.rowconfigure(0, weight=1)
-    root.resizable(False, False)
+        # Add Components to the GUI
+        self.com_port_label.grid(row=0, column=0, sticky=tk.W)  # COM Port
+        self.com_menu.grid(row=0, column=1, sticky=tk.W)
+        self.cam_top_label.grid(row=1, column=0, sticky=tk.W)  # Camera top
+        self.top_cam_menu.grid(row=1, column=1, sticky=tk.W)
+        self.cam_bottom_label.grid(row=2, column=0, sticky=tk.W)  # Camera bottom
+        self.bottom_cam_menu.grid(row=2, column=1, sticky=tk.W)
+        self.light_level_label.grid(row=4, column=0, sticky=tk.W)  # Light Level
+        self.light_level_slider.grid(row=4, column=1, sticky=tk.W)
+        self.motor_speed_level.grid(row=5, column=0, sticky=tk.W)  # Motor Speed
+        self.motor_speed_slider.grid(row=5, column=1, sticky=tk.W)
+        self.solve_button.grid(row=8, column=0)  # Solve Button
+        self.scramble_button.grid(row=8, column=1)  # Scramble Button
 
-    # Create Field Labels
-    com_port_label = tk.Label(root, text="COM Port: ")
-    cam_top_label = tk.Label(root, text="Top Camera: ")
-    cam_bottom_label = tk.Label(root, text="Bottom Camera: ")
-    light_level_label = tk.Label(root, text="Light Level: ")
-    motor_speed_level = tk.Label(root, text="Motor Speed: ")
+        # Run GUI
+        self.root.mainloop()
 
-    # Create GUI Components
-    com_option_selected = tk.StringVar()
-    com_option_selected.set(get_available_com_ports()[0])
-    com_menu = tk.OptionMenu(root, com_option_selected, *get_available_com_ports())
+    def on_serial_change(self, *_args):
+        if self.ser: self.ser.close()
+        # Set up serial
+        self.ser.port = self.com_option_selected.get()
+        try:
+            self.ser.open()
+            print(f"Switched to port {self.ser.port}")
+        except serial.serialutil.SerialException:
+            print("Failed to open Serial")
+            self.ser.close()
 
-    top_cam_option_selected = tk.StringVar()
-    top_cam_option_selected.set(get_available_cams()[0])
-    top_cam_menu = tk.OptionMenu(root, top_cam_option_selected, *get_available_cams())
+    def on_light_change(self, *_args):
+        SerTool.send_serial(self.ser, f"lights {self.light_level_slider.get()}")
 
-    bottom_cam_option_selected = tk.StringVar()
-    bottom_cam_option_selected.set(get_available_cams()[0])
-    bottom_cam_menu = tk.OptionMenu(root, bottom_cam_option_selected, *get_available_cams())
+    def on_solve(self):
+        if self.cube.is_solved(): return
+        # Use AI To Calculate Solve
+        time_limit = 10
+        solve_moves = self.ai_solver.solve(self.cube, time_limit)
+        for move in solve_moves: perform_move(self.cube, move)
+        solve_moves = [MoveDecoder[i] for i in solve_moves]
+        SerTool.send_serial(self.ser, SerTool.parse_moves_simplify(solve_moves, str(self.motor_speed_slider.get())))
 
-    light_level_slider = tk.Scale(root, from_=0, to=255, orient=tk.HORIZONTAL, length=200)
-    motor_speed_slider = tk.Scale(root, from_=200, to=80, orient=tk.HORIZONTAL, length=200)
+    def on_scramble(self):
+        # cv_static = ComputerVisionStatic()
+        # self.cube = RubiksCube(cv_static.scanCube())
+        self.cube.scramble(30)
 
-    solve_button = tk.Button(root, text="Solve", command=solve_action, width=15, height=4)
-    scramble_button = tk.Button(root, text="Scramble", command=scramble_action, width=15, height=4)
-
-    # Add Components to the GUI
-    com_port_label.grid(row=0, column=0, sticky=tk.W)
-    com_menu.grid(row=0, column=1, sticky=tk.W)
-
-    cam_top_label.grid(row=1, column=0, sticky=tk.W)
-    top_cam_menu.grid(row=1, column=1, sticky=tk.W)
-
-    cam_bottom_label.grid(row=2, column=0, sticky=tk.W)
-    bottom_cam_menu.grid(row=2, column=1, sticky=tk.W)
-
-    light_level_label.grid(row=4, column=0, sticky=tk.W)
-    light_level_slider.grid(row=4, column=1, sticky=tk.W)
-
-    motor_speed_level.grid(row=5, column=0, sticky=tk.W)
-    motor_speed_slider.grid(row=5, column=1, sticky=tk.W)
-
-    solve_button.grid(row=8, column=0)
-    scramble_button.grid(row=8, column=1)
-
-    # Run GUI
-    root.mainloop()
+    def on_close(self):
+        self.ser.close()
+        self.visualizer.stop()
+        self.root.destroy()
 
 
 if __name__ == "__main__":
-    run_gui()
+    gui = RobotGUI()

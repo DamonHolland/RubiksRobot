@@ -26,7 +26,8 @@ class RubiksVisualizer:
     z_angle = 0
 
     def __init__(self, rubiks_cube):
-        Thread(target=self.start, args=[rubiks_cube]).start()
+        self.running = True
+        Thread(target=self.start, args=[rubiks_cube], daemon=True).start()
 
     def start(self, rubiks_cube):
         pygame.init()
@@ -35,12 +36,11 @@ class RubiksVisualizer:
         glEnable(GL_DEPTH_TEST)
         glTranslatef(0.0, 0.0, -8)
         pygame.display.set_caption("Rubik's Cube")
-        running = True
         drag = False
         prev_mouse_pos = [0, 0]
-        while running:
+        while self.running:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT: running = False
+                if event.type == pygame.QUIT: self.running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     drag = True
                     prev_mouse_pos = pygame.mouse.get_pos()
@@ -55,6 +55,9 @@ class RubiksVisualizer:
             self.draw_cube(rubiks_cube)
             pygame.display.flip()
             pygame.time.Clock().tick(60)
+
+    def stop(self):
+        self.running = False
 
     def draw_cube(self, cube):
         # Piece Color Order: Left, Right, Bottom, Top, Front, Back
