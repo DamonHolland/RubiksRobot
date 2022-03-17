@@ -45,6 +45,7 @@ class ConsoleRedirect(tk.Text):
         self.config(state="normal")
         self.insert("end", content)
         self.config(state="disabled")
+        self.see(tk.END)
 
     def reset(self, _event):
         sys.stdout = self.old_stdout
@@ -89,7 +90,7 @@ class RobotGUI:
         self.top_cam_selected.trace("w", self.on_top_cam_change)
         self.top_cam_menu = tk.OptionMenu(self.root, self.top_cam_selected, *get_available_cams())
         self.bottom_cam_selected = tk.StringVar()  # Camera bottom
-        self.bottom_cam_selected.set(get_available_cams()[1])
+        self.bottom_cam_selected.set(get_available_cams()[1 if len(get_available_cams()) > 1 else 0])
         self.bottom_cam_selected.trace("w", self.on_bottom_cam_change)
         self.bottom_cam_menu = tk.OptionMenu(self.root, self.bottom_cam_selected, *get_available_cams())  # Light Level
         self.light_level_slider = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL, length=200)
@@ -124,7 +125,6 @@ class RobotGUI:
 
         # Add main events
         self.root.after(50, self.scan_cube)  # Scan Cube Event
-        self.root.after(50, self.on_console_change)  # Console Scroll Event
 
         # Run GUI
         self.root.mainloop()
@@ -133,10 +133,6 @@ class RobotGUI:
         cube_state = self.cv_static.scan_cube()
         if cube_state: self.cube.faces = cube_state
         self.root.after(50, self.scan_cube)
-
-    def on_console_change(self):
-        self.console_redirect.see(tk.END)
-        self.root.after(50, self.on_console_change)
 
     def on_serial_change(self, *_args):
         if self.ser: self.ser.close()
