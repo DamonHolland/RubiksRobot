@@ -1,4 +1,5 @@
 import sys
+import time
 import tkinter as tk
 import serial
 import serial.tools.list_ports
@@ -159,18 +160,23 @@ class RobotGUI:
         SerTool.send_serial(self.ser, f"lights {self.light_level_slider.get()}")
 
     def on_solve(self):
+        self.scan_cube()
         if self.cube.is_solved(): return
-        if not KociembaSolver.solve_kociemba(self.cube):
-            print("Unsolvable Configuration")
-            return
-        # Use AI To Calculate Solve
-        solve_moves = self.ai_solver.solve(self.cube, int(self.ai_timeout_level.get()))
-        if not solve_moves:
-            print("Unsolvable Configuration")
-            return
-        for move in solve_moves: perform_move(self.cube, move)
-        solve_moves = [MoveDecoder[i] for i in solve_moves]
-        SerTool.send_serial(self.ser, SerTool.parse_moves_simplify(solve_moves, str(self.motor_speed_slider.get())))
+        while not self.cube.is_solved():
+            if not KociembaSolver.solve_kociemba(self.cube):
+                print("Unsolvable Configuration")
+                return
+            # Use AI To Calculate Solve
+            solve_moves = self.ai_solver.solve(self.cube, int(self.ai_timeout_level.get()))
+            if not solve_moves:
+                print("Unsolvable Configuration")
+                return
+            for move in solve_moves: perform_move(self.cube, move)
+            solve_moves = [MoveDecoder[i] for i in solve_moves]
+            SerTool.send_serial(self.ser, SerTool.parse_moves_simplify(solve_moves, str(self.motor_speed_slider.get())))
+            # Wait to receive done signal from Robot
+            time.sleep(4)
+            self.scan_cube()
 
     def on_scramble(self):
         test_cube = RubiksCube()
