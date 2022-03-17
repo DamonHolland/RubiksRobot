@@ -34,7 +34,7 @@ class RobotGUI:
         self.cube = RubiksCube()
         self.visualizer = RubiksVisualizer(self.cube)
         self.ai_solver = AISolver("../ai/models/10_Model")
-        self.cv_static = ComputerVisionStatic(0, 1)
+        self.cv_static = ComputerVisionStatic("../cv/saved_pixels.txt", 0, 1)
 
         # Create GUI Root
         self.root = tk.Tk()
