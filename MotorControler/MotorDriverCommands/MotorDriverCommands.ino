@@ -25,7 +25,7 @@
 #define bttn1 39
 #define bttn2 41
 #define lightPin 37
-#define NUMPIXELS 6
+#define NUMPIXELS 12
 
 Adafruit_NeoPixel lights = Adafruit_NeoPixel(NUMPIXELS, lightPin, NEO_GRB + NEO_KHZ800);
 
@@ -113,15 +113,14 @@ void loop() {
     }
   }
 
-  if (strcmp(buff, "lights on") == 0) {
-    turnLightsOn();
+  if (strstr(buff, "lights")) {
+    char* walk = buff;
+    while (*walk != ' '){
+      walk++;
+    }
+    walk++;
+    turnLightsOn(atoi(walk));
     memset(buff, '\0', MAX_COMMAND_SIZE);
-    Serial.println("Lights ON");
-  }
-  else if (strcmp(buff, "lights off") == 0) {
-    turnLightsOff();
-    memset(buff, '\0', MAX_COMMAND_SIZE);
-    Serial.println("Lights OFF");
   }
   else {
     clearTimer();
@@ -363,19 +362,14 @@ void scrambleCube() {
   }
 }
 
-void turnLightsOn() {
+void turnLightsOn(int brightness) {
   for(int i=0;i<NUMPIXELS;i++){
 
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
     lights.setPixelColor(i,255, 255, 255, 127); // Moderately bright green color.
-    lights.setBrightness(12);
+    lights.setBrightness(brightness);
     lights.show(); // This sends the updated pixel color to the hardware.
     delay(500);
 
   }
-}
-
-void turnLightsOff() {
-  lights.clear();
-  lights.show();
 }
