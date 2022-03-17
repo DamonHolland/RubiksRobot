@@ -129,9 +129,16 @@ void loop() {
     currentPos = 0;
     display2.setSegments(blank);
     display2.setSegments(red);
-    while(digitalRead(bttn1) == LOW){};
+    if (strstr(buff, "-w")) {
+      while(digitalRead(bttn1) == LOW){};
       startTimer();
       while(parseCommandFromLine(buff, &currentPos)) {
+      }
+    }
+    else {
+      startTimer();
+      while(parseCommandFromLine(buff, &currentPos)) {
+      }
     }
     endTimer();
     memset(buff, '\0', MAX_COMMAND_SIZE);
