@@ -34,6 +34,7 @@ class RobotGUI:
         self.cube = RubiksCube()
         self.visualizer = RubiksVisualizer(self.cube)
         self.ai_solver = AISolver("../ai/models/10_Model")
+        self.cv_static = ComputerVisionStatic(0, 1)
 
         # Create GUI Root
         self.root = tk.Tk()
@@ -43,6 +44,9 @@ class RobotGUI:
         self.root.rowconfigure(0, weight=1)
         self.root.resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+
+        # Add main events
+        self.root.after(50, self.scan_cube)
 
         # Create Field Labels
         self.com_port_label = tk.Label(self.root, text="COM Port: ")
@@ -58,9 +62,11 @@ class RobotGUI:
         self.com_menu = tk.OptionMenu(self.root, self.com_option_selected, *get_available_com_ports())
         self.top_cam_selected = tk.StringVar()  # Camera top
         self.top_cam_selected.set(get_available_cams()[0])
+        self.top_cam_selected.trace("w", self.on_top_cam_change)
         self.top_cam_menu = tk.OptionMenu(self.root, self.top_cam_selected, *get_available_cams())
         self.bottom_cam_selected = tk.StringVar()  # Camera bottom
-        self.bottom_cam_selected.set(get_available_cams()[0])
+        self.bottom_cam_selected.set(get_available_cams()[1])
+        self.bottom_cam_selected.trace("w", self.on_bottom_cam_change)
         self.bottom_cam_menu = tk.OptionMenu(self.root, self.bottom_cam_selected, *get_available_cams())  # Light Level
         self.light_level_slider = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL, length=200)
         self.light_level_slider.bind("<ButtonRelease-1>", self.on_light_change)
@@ -85,6 +91,11 @@ class RobotGUI:
         # Run GUI
         self.root.mainloop()
 
+    def scan_cube(self):
+        cube_state = self.cv_static.scan_cube()
+        if cube_state: self.cube.faces = cube_state
+        self.root.after(50, self.scan_cube)
+
     def on_serial_change(self, *_args):
         if self.ser: self.ser.close()
         # Set up serial
@@ -95,6 +106,12 @@ class RobotGUI:
         except serial.serialutil.SerialException:
             print("Failed to open Serial")
             self.ser.close()
+
+    def on_top_cam_change(self, *_args):
+        self.cv_static.set_top_cam(int(self.top_cam_selected.get()))
+
+    def on_bottom_cam_change(self, *_args):
+        self.cv_static.set_bottom_cam(int(self.bottom_cam_selected.get()))
 
     def on_light_change(self, *_args):
         SerTool.send_serial(self.ser, f"lights {self.light_level_slider.get()}")
@@ -109,12 +126,15 @@ class RobotGUI:
         SerTool.send_serial(self.ser, SerTool.parse_moves_simplify(solve_moves, str(self.motor_speed_slider.get())))
 
     def on_scramble(self):
-        # cv_static = ComputerVisionStatic()
-        # self.cube = RubiksCube(cv_static.scanCube())
-        self.cube.scramble(30)
+        scramble_amount = 30
+        test_cube = RubiksCube()
+        scramble = test_cube.scramble(scramble_amount)
+        scramble = [MoveDecoder[i] for i in scramble]
+        SerTool.send_serial(self.ser, SerTool.parse_moves_simplify(scramble, str(self.motor_speed_slider.get())))
 
     def on_close(self):
         self.ser.close()
+        self.cv_static.terminate_cameras()
         self.visualizer.stop()
         self.root.destroy()
 
