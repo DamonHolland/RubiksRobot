@@ -41,8 +41,9 @@ class AISolver:
                 if new.value == -sys.maxsize:
                     return new.moves
                 heapq.heappush(heap, new)
-        print("AI did not find solution. Kociemba algorithm was used as backup.")
-        return solve_kociemba(cube)
+        solve = solve_kociemba(cube)
+        if solve: print("Kociemba's algorithm was used for solve.")
+        return solve
 
     def get_categorical_prediction(self, cube) -> int:
         predictions = list(self.model.predict_single(encode_to_input(cube)))

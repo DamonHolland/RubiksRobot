@@ -28,7 +28,10 @@ def kociemba_string(cube):
 
 def solve_kociemba(cube):
     # Pass modified string to Kociemba to generate solve
-    solve = kociemba.solve(kociemba_string(cube)).split(' ')
+    try:
+        solve = kociemba.solve(kociemba_string(cube)).split(' ')
+    except ValueError:
+        return None
     # Replace double moves with two single moves
     for i, item in list(enumerate(solve))[::-1]:
         if item == 'U2':

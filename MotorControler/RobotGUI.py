@@ -1,8 +1,10 @@
+import sys
 import tkinter as tk
 import serial
 import serial.tools.list_ports
 import cv2 as opencv
 import MotorControler.RubiksSerialTools as SerTool
+from ai import KociembaSolver
 from ai.AISolver import AISolver
 from ai.RubiksMoves import MoveDecoder, perform_move
 from cv.ComputerVisionStatic import ComputerVisionStatic
@@ -26,27 +28,47 @@ def get_available_cams():
         return available_cams
 
 
+class ConsoleRedirect(tk.Text):
+    def __init__(self, *args, **kwargs):
+        kwargs.update({"state": "disabled"})
+        tk.Text.__init__(self, *args, **kwargs)
+        self.bind("<Destroy>", self.reset)
+        self.old_stdout = sys.stdout
+        sys.stdout = self
+
+    def delete(self, *args, **kwargs):
+        self.config(state="normal")
+        self.delete(*args, **kwargs)
+        self.config(state="disabled")
+
+    def write(self, content):
+        self.config(state="normal")
+        self.insert("end", content)
+        self.config(state="disabled")
+
+    def reset(self, _event):
+        sys.stdout = self.old_stdout
+
+
 class RobotGUI:
     def __init__(self):
         # Create Rubiks Solving Components
         self.ser = serial.Serial()
         self.ser.baudrate = 9600
         self.cube = RubiksCube()
-        self.visualizer = RubiksVisualizer(self.cube)
         self.ai_solver = AISolver("../ai/models/10_Model")
         self.cv_static = ComputerVisionStatic("../cv/saved_pixels.txt", 0, 1)
+        self.visualizer = RubiksVisualizer(self.cube)
 
         # Create GUI Root
         self.root = tk.Tk()
         self.root.title('Rubiks Robot GUI')
-        self.root.geometry("400x260")
+        self.root.geometry("400x480")
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.root.resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
-
-        # Add main events
-        self.root.after(50, self.scan_cube)
+        self.root.iconphoto(False, tk.PhotoImage(file='gui.png'))
 
         # Create Field Labels
         self.com_port_label = tk.Label(self.root, text="COM Port: ")
@@ -54,6 +76,8 @@ class RobotGUI:
         self.cam_bottom_label = tk.Label(self.root, text="Bottom Camera: ")
         self.light_level_label = tk.Label(self.root, text="Light Level: ")
         self.motor_speed_level = tk.Label(self.root, text="Motor Speed: ")
+        self.ai_timeout_label = tk.Label(self.root, text="AI Timeout: ")
+        self.scramble_count_label = tk.Label(self.root, text="Scramble Count: ")
 
         # Create GUI Components
         self.com_option_selected = tk.StringVar()  # COM Port
@@ -71,8 +95,13 @@ class RobotGUI:
         self.light_level_slider = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL, length=200)
         self.light_level_slider.bind("<ButtonRelease-1>", self.on_light_change)
         self.motor_speed_slider = tk.Scale(self.root, from_=200, to=80, orient=tk.HORIZONTAL, length=200)  # Motor Level
+        self.motor_speed_slider.set(120)
         self.solve_button = tk.Button(self.root, text="Solve", command=self.on_solve, width=15, height=4)
         self.scramble_button = tk.Button(self.root, text="Scramble", command=self.on_scramble, width=15, height=4)
+        self.ai_timeout_level = tk.Scale(self.root, from_=0, to=30, orient=tk.HORIZONTAL, length=200)  # AI Timeout
+        self.scramble_count_level = tk.Scale(self.root, from_=1, to=100, orient=tk.HORIZONTAL, length=200)  # Scramble
+        self.scramble_count_level.set(30)
+        self.console_redirect = ConsoleRedirect(self.root, height=8)  # Console Redirect
 
         # Add Components to the GUI
         self.com_port_label.grid(row=0, column=0, sticky=tk.W)  # COM Port
@@ -85,8 +114,17 @@ class RobotGUI:
         self.light_level_slider.grid(row=4, column=1, sticky=tk.W)
         self.motor_speed_level.grid(row=5, column=0, sticky=tk.W)  # Motor Speed
         self.motor_speed_slider.grid(row=5, column=1, sticky=tk.W)
+        self.ai_timeout_label.grid(row=6, column=0, sticky=tk.W)  # AI Timeout
+        self.ai_timeout_level.grid(row=6, column=1, sticky=tk.W)
+        self.scramble_count_label.grid(row=7, column=0, sticky=tk.W)  # Scramble Count
+        self.scramble_count_level.grid(row=7, column=1, sticky=tk.W)
         self.solve_button.grid(row=8, column=0)  # Solve Button
         self.scramble_button.grid(row=8, column=1)  # Scramble Button
+        self.console_redirect.grid(row=9, column=0, columnspan=2)  # Console Redirect
+
+        # Add main events
+        self.root.after(50, self.scan_cube)  # Scan Cube Event
+        self.root.after(50, self.on_console_change)  # Console Scroll Event
 
         # Run GUI
         self.root.mainloop()
@@ -95,6 +133,10 @@ class RobotGUI:
         cube_state = self.cv_static.scan_cube()
         if cube_state: self.cube.faces = cube_state
         self.root.after(50, self.scan_cube)
+
+    def on_console_change(self):
+        self.console_redirect.see(tk.END)
+        self.root.after(50, self.on_console_change)
 
     def on_serial_change(self, *_args):
         if self.ser: self.ser.close()
@@ -108,29 +150,37 @@ class RobotGUI:
             self.ser.close()
 
     def on_top_cam_change(self, *_args):
-        self.cv_static.set_top_cam(int(self.top_cam_selected.get()))
+        cam = int(self.top_cam_selected.get())
+        print(f"Switching top camera to: {str(cam)}")
+        self.cv_static.set_top_cam(cam)
 
     def on_bottom_cam_change(self, *_args):
-        self.cv_static.set_bottom_cam(int(self.bottom_cam_selected.get()))
+        cam = int(self.bottom_cam_selected.get())
+        print(f"Switching bottom camera to: {str(cam)}")
+        self.cv_static.set_bottom_cam(cam)
 
     def on_light_change(self, *_args):
         SerTool.send_serial(self.ser, f"lights {self.light_level_slider.get()}")
 
     def on_solve(self):
         if self.cube.is_solved(): return
+        if not KociembaSolver.solve_kociemba(self.cube):
+            print("Unsolvable Configuration")
+            return
         # Use AI To Calculate Solve
-        time_limit = 10
-        solve_moves = self.ai_solver.solve(self.cube, time_limit)
+        solve_moves = self.ai_solver.solve(self.cube, int(self.ai_timeout_level.get()))
+        if not solve_moves:
+            print("Unsolvable Configuration")
+            return
         for move in solve_moves: perform_move(self.cube, move)
         solve_moves = [MoveDecoder[i] for i in solve_moves]
         SerTool.send_serial(self.ser, SerTool.parse_moves_simplify(solve_moves, str(self.motor_speed_slider.get())))
 
     def on_scramble(self):
-        scramble_amount = 30
         test_cube = RubiksCube()
-        scramble = test_cube.scramble(scramble_amount)
+        scramble = test_cube.scramble(int(self.scramble_count_level.get()))
         scramble = [MoveDecoder[i] for i in scramble]
-        SerTool.send_serial(self.ser, SerTool.parse_moves_simplify(scramble, str(self.motor_speed_slider.get())))
+        SerTool.send_serial(self.ser, SerTool.parse_moves_strict(scramble, str(self.motor_speed_slider.get())))
 
     def on_close(self):
         self.ser.close()

@@ -7,6 +7,7 @@ from OpenGL.raw.GLU import gluPerspective
 from model.RubiksCube import RubiksCube
 from pygame.locals import *
 from math import *
+from ai import KociembaSolver
 
 ColorDict = {RubiksCube.WHITE: (1, 1, 1),
              RubiksCube.GREEN: (0, 1, 0),
@@ -50,8 +51,10 @@ class RubiksVisualizer:
                 self.x_angle += (pygame.mouse.get_pos()[1] - prev_mouse_pos[1]) * self.ROTATE_SPEED
                 prev_mouse_pos = pygame.mouse.get_pos()
             glRotatef(0, 0, 0, 0)
-            glClearColor(0.1, 0.1, 0.2, 0)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+            # Change BG color if configuration is solvable
+            if KociembaSolver.solve_kociemba(rubiks_cube): glClearColor(0, 0, 0, 0)
+            else: glClearColor(0.1, 0.1, 0.2, 0)
             self.draw_cube(rubiks_cube)
             pygame.display.flip()
             pygame.time.Clock().tick(60)
