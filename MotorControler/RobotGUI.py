@@ -36,7 +36,9 @@ class RobotGUI:
         self.ser.baudrate = 9600
         self.cube = RubiksCube()
         self.ai_solver = AISolver("../ai/models/10_Model")
-        self.cv_static = ComputerVisionStatic("../cv/saved_pixels.txt", 0, 1)
+        default_top_cam = "0"
+        default_bot_cam = "0"
+        self.cv_static = ComputerVisionStatic("../cv/saved_pixels.txt", int(default_top_cam), int(default_top_cam))
         self.visualizer = RubiksVisualizer(self.cube)
 
         self.available_cams = get_available_cams()
@@ -45,7 +47,7 @@ class RobotGUI:
         # Create GUI Root
         self.root = tk.Tk()
         self.root.title('Rubiks Robot GUI')
-        self.root.geometry("800x800")
+        self.root.geometry("1000x800")
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.root.resizable(False, False)
@@ -55,6 +57,11 @@ class RobotGUI:
         # Configure Style
         style = ttk.Style()
         style.theme_use("clam")
+        self.root.columnconfigure(0, weight=1)
+        self.root.columnconfigure(1, weight=1)
+        self.root.columnconfigure(2, weight=1)
+        self.root.columnconfigure(3, weight=1)
+
 
         # Create Field Labels
         self.com_port_label = tk.Label(self.root, text="COM Port: ")
@@ -71,11 +78,11 @@ class RobotGUI:
         self.com_option_selected.set(self.available_coms[0])
         self.com_menu = tk.OptionMenu(self.root, self.com_option_selected, *self.available_coms)
         self.top_cam_selected = tk.StringVar()  # Camera top
-        self.top_cam_selected.set(self.available_cams[0])
+        self.top_cam_selected.set(default_top_cam)
         self.top_cam_selected.trace("w", self.on_top_cam_change)
         self.top_cam_menu = tk.OptionMenu(self.root, self.top_cam_selected, *self.available_cams)
         self.bottom_cam_selected = tk.StringVar()  # Camera bottom
-        self.bottom_cam_selected.set(self.available_cams[1])
+        self.bottom_cam_selected.set(default_bot_cam)
         self.bottom_cam_selected.trace("w", self.on_bottom_cam_change)
         self.bottom_cam_menu = tk.OptionMenu(self.root, self.bottom_cam_selected, *self.available_cams)  # Light Level
         self.light_level_slider = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL, length=200)
@@ -87,10 +94,10 @@ class RobotGUI:
         self.ai_timeout_level = tk.Scale(self.root, from_=0, to=30, orient=tk.HORIZONTAL, length=200)  # AI Timeout
         self.scramble_count_level = tk.Scale(self.root, from_=1, to=100, orient=tk.HORIZONTAL, length=200)  # Scramble
         self.scramble_count_level.set(30)
-        self.cube_image = tk.Label()
+        self.video_feed = tk.Label()  # Video Feed
 
         # Add Components to the GUI
-        self.cube_image.grid(row=0, column=0, columnspan=2)  # Video Feed
+        self.video_feed.grid(row=0, column=0, columnspan=4)  # Video Feed
         self.com_port_label.grid(row=1, column=0, sticky=tk.W)  # COM Port
         self.com_menu.grid(row=1, column=1, sticky=tk.W)
         self.cam_top_label.grid(row=2, column=0, sticky=tk.W)  # Camera top
@@ -106,7 +113,7 @@ class RobotGUI:
         self.scramble_count_label.grid(row=7, column=0, sticky=tk.W)  # Scramble Count
         self.scramble_count_level.grid(row=7, column=1, sticky=tk.W)
         self.solve_button.grid(row=8, column=0)  # Solve Button
-        self.scramble_button.grid(row=8, column=1)  # Scramble Button
+        self.scramble_button.grid(row=8, column=1, sticky=tk.W)  # Scramble Button
 
         # Add main events
         self.root.after(0, self.scan_cube)  # Scan Cube Event
@@ -118,9 +125,9 @@ class RobotGUI:
         if cube_state := self.cv_static.scan_cube():
             merged = opencv.hconcat([self.cv_static.frame_top, self.cv_static.frame_bot])
             merged = opencv.cvtColor(merged, opencv.COLOR_BGR2RGBA)
-            merged = Image.fromarray(merged).resize((800, 400))
+            merged = Image.fromarray(merged).resize((1000, 500))
             merged = ImageTk.PhotoImage(image=merged)
-            self.cube_image.config(image=merged)
+            self.video_feed.config(image=merged)
             self.cube.faces = cube_state
             self.root.update()
         self.root.after(0, self.scan_cube)
