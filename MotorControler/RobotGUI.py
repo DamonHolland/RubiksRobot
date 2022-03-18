@@ -1,6 +1,5 @@
-import sys
-import time
 import tkinter as tk
+from tkinter import ttk
 import serial
 import serial.tools.list_ports
 import cv2 as opencv
@@ -11,6 +10,7 @@ from ai.RubiksMoves import MoveDecoder, perform_move
 from cv.ComputerVisionStatic import ComputerVisionStatic
 from model.RubiksCube import RubiksCube
 from model.RubiksVisualizer import RubiksVisualizer
+from PIL import Image, ImageTk
 
 
 def get_available_com_ports():
@@ -29,29 +29,6 @@ def get_available_cams():
         return available_cams
 
 
-class ConsoleRedirect(tk.Text):
-    def __init__(self, *args, **kwargs):
-        kwargs.update({"state": "disabled"})
-        tk.Text.__init__(self, *args, **kwargs)
-        self.bind("<Destroy>", self.reset)
-        self.old_stdout = sys.stdout
-        sys.stdout = self
-
-    def delete(self, *args, **kwargs):
-        self.config(state="normal")
-        self.delete(*args, **kwargs)
-        self.config(state="disabled")
-
-    def write(self, content):
-        self.config(state="normal")
-        self.insert("end", content)
-        self.config(state="disabled")
-        self.see(tk.END)
-
-    def reset(self, _event):
-        sys.stdout = self.old_stdout
-
-
 class RobotGUI:
     def __init__(self):
         # Create Rubiks Solving Components
@@ -62,15 +39,22 @@ class RobotGUI:
         self.cv_static = ComputerVisionStatic("../cv/saved_pixels.txt", 0, 1)
         self.visualizer = RubiksVisualizer(self.cube)
 
+        self.available_cams = get_available_cams()
+        self.available_coms = get_available_com_ports()
+
         # Create GUI Root
         self.root = tk.Tk()
         self.root.title('Rubiks Robot GUI')
-        self.root.geometry("400x480")
+        self.root.geometry("800x800")
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.root.resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.root.iconphoto(False, tk.PhotoImage(file='gui.png'))
+
+        # Configure Style
+        style = ttk.Style()
+        style.theme_use("clam")
 
         # Create Field Labels
         self.com_port_label = tk.Label(self.root, text="COM Port: ")
@@ -84,16 +68,16 @@ class RobotGUI:
         # Create GUI Components
         self.com_option_selected = tk.StringVar()  # COM Port
         self.com_option_selected.trace("w", self.on_serial_change)
-        self.com_option_selected.set(get_available_com_ports()[0])
-        self.com_menu = tk.OptionMenu(self.root, self.com_option_selected, *get_available_com_ports())
+        self.com_option_selected.set(self.available_coms[0])
+        self.com_menu = tk.OptionMenu(self.root, self.com_option_selected, *self.available_coms)
         self.top_cam_selected = tk.StringVar()  # Camera top
-        self.top_cam_selected.set(get_available_cams()[0])
+        self.top_cam_selected.set(self.available_cams[0])
         self.top_cam_selected.trace("w", self.on_top_cam_change)
-        self.top_cam_menu = tk.OptionMenu(self.root, self.top_cam_selected, *get_available_cams())
+        self.top_cam_menu = tk.OptionMenu(self.root, self.top_cam_selected, *self.available_cams)
         self.bottom_cam_selected = tk.StringVar()  # Camera bottom
-        self.bottom_cam_selected.set(get_available_cams()[1 if len(get_available_cams()) > 1 else 0])
+        self.bottom_cam_selected.set(self.available_cams[1])
         self.bottom_cam_selected.trace("w", self.on_bottom_cam_change)
-        self.bottom_cam_menu = tk.OptionMenu(self.root, self.bottom_cam_selected, *get_available_cams())  # Light Level
+        self.bottom_cam_menu = tk.OptionMenu(self.root, self.bottom_cam_selected, *self.available_cams)  # Light Level
         self.light_level_slider = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL, length=200)
         self.light_level_slider.bind("<ButtonRelease-1>", self.on_light_change)
         self.motor_speed_slider = tk.Scale(self.root, from_=200, to=80, orient=tk.HORIZONTAL, length=200)  # Motor Level
@@ -103,15 +87,16 @@ class RobotGUI:
         self.ai_timeout_level = tk.Scale(self.root, from_=0, to=30, orient=tk.HORIZONTAL, length=200)  # AI Timeout
         self.scramble_count_level = tk.Scale(self.root, from_=1, to=100, orient=tk.HORIZONTAL, length=200)  # Scramble
         self.scramble_count_level.set(30)
-        self.console_redirect = ConsoleRedirect(self.root, height=8)  # Console Redirect
+        self.cube_image = tk.Label()
 
         # Add Components to the GUI
-        self.com_port_label.grid(row=0, column=0, sticky=tk.W)  # COM Port
-        self.com_menu.grid(row=0, column=1, sticky=tk.W)
-        self.cam_top_label.grid(row=1, column=0, sticky=tk.W)  # Camera top
-        self.top_cam_menu.grid(row=1, column=1, sticky=tk.W)
-        self.cam_bottom_label.grid(row=2, column=0, sticky=tk.W)  # Camera bottom
-        self.bottom_cam_menu.grid(row=2, column=1, sticky=tk.W)
+        self.cube_image.grid(row=0, column=0, columnspan=2)  # Video Feed
+        self.com_port_label.grid(row=1, column=0, sticky=tk.W)  # COM Port
+        self.com_menu.grid(row=1, column=1, sticky=tk.W)
+        self.cam_top_label.grid(row=2, column=0, sticky=tk.W)  # Camera top
+        self.top_cam_menu.grid(row=2, column=1, sticky=tk.W)
+        self.cam_bottom_label.grid(row=3, column=0, sticky=tk.W)  # Camera bottom
+        self.bottom_cam_menu.grid(row=3, column=1, sticky=tk.W)
         self.light_level_label.grid(row=4, column=0, sticky=tk.W)  # Light Level
         self.light_level_slider.grid(row=4, column=1, sticky=tk.W)
         self.motor_speed_level.grid(row=5, column=0, sticky=tk.W)  # Motor Speed
@@ -122,18 +107,23 @@ class RobotGUI:
         self.scramble_count_level.grid(row=7, column=1, sticky=tk.W)
         self.solve_button.grid(row=8, column=0)  # Solve Button
         self.scramble_button.grid(row=8, column=1)  # Scramble Button
-        self.console_redirect.grid(row=9, column=0, columnspan=2)  # Console Redirect
 
         # Add main events
-        self.root.after(50, self.scan_cube)  # Scan Cube Event
+        self.root.after(0, self.scan_cube)  # Scan Cube Event
 
         # Run GUI
         self.root.mainloop()
 
     def scan_cube(self):
-        cube_state = self.cv_static.scan_cube()
-        if cube_state: self.cube.faces = cube_state
-        self.root.after(50, self.scan_cube)
+        if cube_state := self.cv_static.scan_cube():
+            merged = opencv.hconcat([self.cv_static.frame_top, self.cv_static.frame_bot])
+            merged = opencv.cvtColor(merged, opencv.COLOR_BGR2RGBA)
+            merged = Image.fromarray(merged).resize((800, 400))
+            merged = ImageTk.PhotoImage(image=merged)
+            self.cube_image.config(image=merged)
+            self.cube.faces = cube_state
+            self.root.update()
+        self.root.after(0, self.scan_cube)
 
     def on_serial_change(self, *_args):
         if self.ser: self.ser.close()
@@ -162,21 +152,17 @@ class RobotGUI:
     def on_solve(self):
         self.scan_cube()
         if self.cube.is_solved(): return
-        while not self.cube.is_solved():
-            if not KociembaSolver.solve_kociemba(self.cube):
-                print("Unsolvable Configuration")
-                return
-            # Use AI To Calculate Solve
-            solve_moves = self.ai_solver.solve(self.cube, int(self.ai_timeout_level.get()))
-            if not solve_moves:
-                print("Unsolvable Configuration")
-                return
-            for move in solve_moves: perform_move(self.cube, move)
-            solve_moves = [MoveDecoder[i] for i in solve_moves]
-            SerTool.send_serial(self.ser, SerTool.parse_moves_simplify(solve_moves, str(self.motor_speed_slider.get())))
-            # Wait to receive done signal from Robot
-            time.sleep(4)
-            self.scan_cube()
+        if not KociembaSolver.solve_kociemba(self.cube):
+            print("Unsolvable Configuration")
+            return
+        # Use AI To Calculate Solve
+        solve_moves = self.ai_solver.solve(self.cube, int(self.ai_timeout_level.get()))
+        if not solve_moves:
+            print("Unsolvable Configuration")
+            return
+        for move in solve_moves: perform_move(self.cube, move)
+        solve_moves = [MoveDecoder[i] for i in solve_moves]
+        SerTool.send_serial(self.ser, SerTool.parse_moves_simplify(solve_moves, str(self.motor_speed_slider.get())))
 
     def on_scramble(self):
         test_cube = RubiksCube()

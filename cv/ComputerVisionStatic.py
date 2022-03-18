@@ -15,9 +15,12 @@ class ComputerVisionStatic:
         self.frameHeight = 720
 
         self.capTop = None
-        self.set_top_cam(top_cam)
         self.capBot = None
-        self.set_bottom_cam(bottom_cam)
+        self.set_top_cam(top_cam)
+        if top_cam == bottom_cam: self.capBot = self.capTop
+        else: self.set_bottom_cam(bottom_cam)
+        self.frame_top = None
+        self.frame_bot = None
 
         # White, Red, Blue
         self.colorsTop = [[(0, 0) for _i in range(9)], [(0, 0) for _i in range(9)], [(0, 0) for _i in range(9)]]
@@ -64,24 +67,24 @@ class ComputerVisionStatic:
                 row[i] = new_pixel
 
     def scan_cube(self):
-        ret_top, frame_top = self.capTop.read()
-        ret_bot, frame_bot = self.capBot.read()
+        ret_top, self.frame_top = self.capTop.read()
+        ret_bot, self.frame_bot = self.capBot.read()
         if not ret_top or not ret_bot: return None
-        draw_pixels(frame_top, self.colorsTop)
-        draw_pixels(frame_bot, self.colorsBot)
-        encoding = self._generate_encoding(frame_top, frame_bot)
-        merged = opencv.vconcat([frame_top, frame_bot])
-        opencv.imshow('Cube Cams', merged)
+        draw_pixels(self.frame_top, self.colorsTop)
+        draw_pixels(self.frame_bot, self.colorsBot)
+        encoding = self._generate_encoding()
+        # merged = opencv.vconcat([self.frame_top, self.frame_bot])
+        # opencv.imshow('Cube Cams', merged)
         return encoding
 
-    def _generate_encoding(self, frame_top, frame_bot):
+    def _generate_encoding(self):
         # Convert Cube
-        encoding = [CV_Rgb.RGBUint8.identifyOneHot(frame_top, p[0], p[1]) for p in self.colorsTop[0]]  # White
-        encoding += [CV_Rgb.RGBUint8.identifyOneHot(frame_bot, p[0], p[1]) for p in self.colorsBot[1]]  # Green
-        encoding += [CV_Rgb.RGBUint8.identifyOneHot(frame_top, p[0], p[1]) for p in self.colorsTop[1]]  # Red
-        encoding += [CV_Rgb.RGBUint8.identifyOneHot(frame_top, p[0], p[1]) for p in self.colorsTop[2]]  # Blue
-        encoding += [CV_Rgb.RGBUint8.identifyOneHot(frame_bot, p[0], p[1]) for p in self.colorsBot[0]]  # Orange
-        encoding += [CV_Rgb.RGBUint8.identifyOneHot(frame_bot, p[0], p[1]) for p in self.colorsBot[2]]  # Yellow
+        encoding = [CV_Rgb.RGBUint8.identifyOneHot(self.frame_top, p[0], p[1]) for p in self.colorsTop[0]]  # White
+        encoding += [CV_Rgb.RGBUint8.identifyOneHot(self.frame_bot, p[0], p[1]) for p in self.colorsBot[1]]  # Green
+        encoding += [CV_Rgb.RGBUint8.identifyOneHot(self.frame_top, p[0], p[1]) for p in self.colorsTop[1]]  # Red
+        encoding += [CV_Rgb.RGBUint8.identifyOneHot(self.frame_top, p[0], p[1]) for p in self.colorsTop[2]]  # Blue
+        encoding += [CV_Rgb.RGBUint8.identifyOneHot(self.frame_bot, p[0], p[1]) for p in self.colorsBot[0]]  # Orange
+        encoding += [CV_Rgb.RGBUint8.identifyOneHot(self.frame_bot, p[0], p[1]) for p in self.colorsBot[2]]  # Yellow
         # Center Caps
         encoding[4] = RubiksCube.WHITE
         encoding[13] = RubiksCube.GREEN
