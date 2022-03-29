@@ -44,6 +44,7 @@ unsigned long startTime;
 unsigned long currentTime;
 unsigned long endTime;
 int numMoves = 0;
+int coolDown = 0;
 
 // Create display object of type TM1637Display:
 TM1637Display display1 = TM1637Display(CLK1, DIO1);
@@ -145,8 +146,13 @@ void loop() {
   }
           
   }
-  else if (digitalRead(bttn2) == HIGH) {
-    scrambleCube();
+  else if (digitalRead(bttn2) == HIGH && coolDown + 1000 < millis()) {
+    Serial.write("Scramble\n");
+    coolDown = millis();
+  }
+  else if (digitalRead(bttn1) == HIGH && coolDown + 1000 < millis()) {
+    Serial.write("Solve\n");
+    coolDown = millis();
   }
 }
 
@@ -376,7 +382,6 @@ void turnLightsOn(int brightness) {
     lights.setPixelColor(i,255, 255, 255, 127); // Moderately bright green color.
     lights.setBrightness(brightness);
     lights.show(); // This sends the updated pixel color to the hardware.
-    delay(500);
 
   }
 }
