@@ -1,6 +1,6 @@
 # RubiksRobot
 
-[![Video](https://img.youtube.com/vi/Xe8N4HvCCsY&t=3s/0.jpg)](https://www.youtube.com/watch?v=Xe8N4HvCCsY&t=3s)
+[![Video](https://img.youtube.com/vi/Xe8N4HvCCsY&t=3s/0.jpg)]
 
 
 #Demos
