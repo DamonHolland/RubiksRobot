@@ -173,10 +173,10 @@ void setUpMotor (motor* motorPtr, int dirPin, int stepPin, int enPin, int maxNum
 void rotateSteps (motor* motor1, int numSteps) {
   digitalWrite(motor1->enPin, LOW);
   for (int i = 0; i < numSteps; i++) {
-  digitalWrite(motor1->stepPin,HIGH); 
-   delayMicroseconds(motorDelay); 
-   digitalWrite(motor1->stepPin,LOW); 
-   delayMicroseconds(motorDelay); 
+    digitalWrite(motor1->stepPin,HIGH); 
+    delayMicroseconds(motorDelay); 
+    digitalWrite(motor1->stepPin,LOW); 
+    delayMicroseconds(motorDelay); 
   }
   digitalWrite(motor1->enPin, HIGH);
 }
