@@ -2,7 +2,7 @@
 
 [![Click. Whir. Flash.](https://img.youtube.com/vi/Xe8N4HvCCsY/0.jpg)](https://www.youtube.com/watch?v=Xe8N4HvCCsY)
 
-[![Robot Timeline](https://www.youtube.com/watch?v=z0wRxpoFXAk)
+[![Click. Whir. Flash.](https://img.youtube.com/vi/z0wRxpoFXAk/0.jpg)](https://www.youtube.com/watch?v=z0wRxpoFXAk)
 
 #Demos
 
