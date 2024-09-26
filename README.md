@@ -4,52 +4,33 @@
 
 [![Click. Whir. Flash.](https://img.youtube.com/vi/z0wRxpoFXAk/0.jpg)](https://www.youtube.com/watch?v=z0wRxpoFXAk)
 
-#Demos
+# Demos
 
-Slow-Mo:
-
+Slow Speed:
 
 https://user-images.githubusercontent.com/70611110/142950256-f690c679-d9b9-4251-b863-233e9b9fdb39.mp4
 
 
-
-
-Sped Up:
-
+Regular Speed:
 
 https://user-images.githubusercontent.com/70611110/142950246-3a7ff516-1f37-40d1-ad8c-dd8923d580dc.mp4
 
 
 
 
-#Notes
+# Notes
 
 Rubik's Cube:
-
 - Have 6 distinct colors/designations/sides
-
 - There are 12 different rotations you can make on a Rubik's cube (including clockwise/counterclockwise)
-
 - 2 Webcams scanning 3 sides of Rubik's cube each
 
-#Numbering the Rubik's Cube
+# Cube Labels
 
-#Top
+## Top
 
-- W - White
+![Cube Top](https://github.com/DamonHolland/RubiksRobot/blob/master/images/rubiks_design_top.jpg)
 
-- G - Green
+## Bottom
 
-- R - Red
-
-![alt text](https://github.com/DamonHolland/RubiksRobot/blob/master/images/Rubik%E2%80%99s%20Cube%20Design%20Top.jpg)
-
-#Bottom
-
-- Y - Yellow
-
-- B - Blue
-
-- O - Orange
-
-![alt text](https://github.com/DamonHolland/RubiksRobot/blob/master/images/Rubik%E2%80%99s%20Cube%20Design%20Bot.jpg)
+![Cube Bottom](https://github.com/DamonHolland/RubiksRobot/blob/master/images/rubiks_design_bottom.jpg)
